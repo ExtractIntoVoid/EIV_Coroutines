@@ -20,6 +20,7 @@ public interface ICoroutineWorker<T> where T : IFloatingPoint<T>, IFloatingPoint
     /// Should the updating pause
     /// </summary>
     bool PauseUpdate { get; set; }
+    bool DontKillSuccess { get; set; }
     void Init();
     void Quit();
     void Update(T deltaTime);

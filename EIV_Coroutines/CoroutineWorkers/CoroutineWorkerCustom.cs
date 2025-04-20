@@ -23,6 +23,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
     public object? ReplacementObject { get; set; }
     public Func<IEnumerator<T>, IEnumerator<T>>? ReplacementFunction { get; set; }
     public bool PauseUpdate { get; set; } = false;
+    public bool DontKillSuccess { get; set; } = false;
     public static T UpdateRate { get; set; } = T.One;
 
     #region Private fields
@@ -191,7 +192,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
                 MutexUnLock();
                 return;
             }
-            cor_delay.DelayAndCor.Cor.ShouldPause = !cor_delay.DelayAndCor.Cor.ShouldPause;
+            cor_delay.DelayAndCor.Cor.IsPaused = !cor_delay.DelayAndCor.Cor.IsPaused;
             //Console.WriteLine("Coroutine {0} changed ShouldPause state", cor_delay.DelayAndCor.Cor.GetHashCode());
             SetCorAndDelayRef(ref cor_delay);
             MutexUnLock();
@@ -242,7 +243,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
     {
         if (ref_values.DelayAndCor.Cor.ShouldKill)
             return;
-        if (ref_values.DelayAndCor.Cor.ShouldPause)
+        if (ref_values.DelayAndCor.Cor.IsPaused)
             return;
         if (ref_values.DelayAndCor.Cor.IsSuccess)
             return;
@@ -251,7 +252,8 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         {
             ref_values.DelayAndCor.Cor.IsRunning = false;
             ref_values.DelayAndCor.Cor.IsSuccess = true;
-            ref_values.DelayAndCor.Cor.ShouldKill = true;
+            if (!DontKillSuccess)
+                ref_values.DelayAndCor.Cor.ShouldKill = true;
             //Console.WriteLine("Coroutine {0} changed states", ref_values.DelayAndCor.Cor);
         }
     }

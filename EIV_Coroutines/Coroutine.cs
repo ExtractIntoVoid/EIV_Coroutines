@@ -8,8 +8,8 @@ public class Coroutine<T>(IEnumerator<T> enumerator, string tag = "")
 {
     public IEnumerator<T> Enumerator = enumerator;
     public bool IsRunning = true;
+    public bool IsPaused;
     public bool ShouldKill;
-    public bool ShouldPause;
     public bool IsSuccess;
     public string Tag => tag;
     public IEnumerator<T> BaseEnumerator { get; } = enumerator;
@@ -31,7 +31,7 @@ public class Coroutine<T>(IEnumerator<T> enumerator, string tag = "")
 
     public override string ToString()
     {
-        return $"{GetHashCode()} IsRunning: {IsRunning}, ShouldKill {ShouldKill}, ShouldPause: {ShouldPause}, IsSuccess: {IsSuccess}, Tag: {Tag}";
+        return $"{GetHashCode()} IsRunning: {IsRunning}, ShouldKill {ShouldKill}, IsPaused: {IsPaused}, IsSuccess: {IsSuccess}, Tag: {Tag}";
     }
 
     public override bool Equals(object? obj)
