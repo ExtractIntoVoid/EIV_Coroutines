@@ -36,7 +36,7 @@ public class Coroutine<T>(IEnumerator<T> enumerator, string tag = "")
 
     public override bool Equals(object? obj)
     {
-        return obj is Coroutine<T> && Equals((Coroutine<T>)obj);
+        return obj is Coroutine<T> coroutine && Equals(coroutine);
     }
 
     public bool Equals(Coroutine<T>? other)

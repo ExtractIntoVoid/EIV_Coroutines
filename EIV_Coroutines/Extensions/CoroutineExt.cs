@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace EIV_Coroutines.Extensions;
 
@@ -42,6 +43,12 @@ public static class CoroutineExt<T> where T : IFloatingPoint<T>, IFloatingPointI
 
     public static T StartAfterCoroutine(CoroutineHandle coroutine)
     {
+        CoroutineStaticExt<T>.StartIfNotExists();
+        if (CoroutineStaticExt<T>.StaticWorker!.IsCoroutineSuccessInstance(coroutine))
+            return T.Zero;
+        CoroutineStaticExt<T>.StartIfNotExists();
+        CoroutineStaticExt<T>.StaticWorker!.ReplacementObject = coroutine;
+        CoroutineStaticExt<T>.StaticWorker!.ReplacementFunction = CoroutineEnumeratorExt<T>.StartAfterCoroutineHelper;
         return T.Zero;
         /*
         Coroutine cor = Instance.CustomCoroutines.FirstOrDefault(x => coroutine.Equals((CoroutineHandle)x));

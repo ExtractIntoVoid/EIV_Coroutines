@@ -24,7 +24,7 @@ public class CoroutineTest_Double
     [Test]
     public void TestWaitCountdown()
     {
-        var handle = CoroutineStaticExt<double>.StartCoroutine(_CountingDown(), "Test");
+        var handle = CoroutineStaticExt<double>.StartCoroutine(CountingDown(), "Test");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.EqualTo(0));
         Thread.Sleep(100);
@@ -51,12 +51,12 @@ public class CoroutineTest_Double
     [Test]
     public void TestWaitFor()
     {
-        var handle = CoroutineStaticExt<double>.StartCoroutine(_WaitForTrue(), "_WaitForTrue");
+        var handle = CoroutineStaticExt<double>.StartCoroutine(WaitForTrue(), "_WaitForTrue");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.EqualTo(0));
         Thread.Sleep(10);
         Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle), Is.EqualTo(true));
-        var WaitAndSetTrue_handle = CoroutineStaticExt<double>.StartCoroutine(_WaitAndSetTrue(), "_WaitAndSetTrue");
+        var WaitAndSetTrue_handle = CoroutineStaticExt<double>.StartCoroutine(WaitAndSetTrue(), "_WaitAndSetTrue");
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineStaticExt<double>.IsCoroutineSuccess(handle))
         {
@@ -71,14 +71,14 @@ public class CoroutineTest_Double
         Assert.That(_TestBoolValue, Is.True);
         Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle), Is.EqualTo(false));
         Assert.That(CoroutineStaticExt<double>.IsCoroutineSuccess(handle), Is.EqualTo(false));
-        //CoroutineStaticExt.KillCoroutines([handle, WaitAndSetTrue_handle]);
+        CoroutineStaticExt<double>.KillCoroutines([handle, WaitAndSetTrue_handle]);
         _TestBoolValue = false;
     }
 
     [Test]
     public void TestKillTag()
     {
-        var handle = CoroutineStaticExt<double>.StartCoroutine(_FakeCountingDown(), "Test");
+        var handle = CoroutineStaticExt<double>.StartCoroutine(FakeCountingDown(), "Test");
         Thread.Sleep(10);
         Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle), Is.EqualTo(true));
         Thread.Sleep(10);
@@ -97,7 +97,7 @@ public class CoroutineTest_Double
     [Test]
     public void TestKill()
     {
-        var handle = CoroutineStaticExt<double>.StartCoroutine(_FakeCountingDown(), "Test_KILL");
+        var handle = CoroutineStaticExt<double>.StartCoroutine(FakeCountingDown(), "Test_KILL");
         Thread.Sleep(10);
         Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle), Is.EqualTo(true));
         Thread.Sleep(10);
@@ -118,12 +118,32 @@ public class CoroutineTest_Double
     public void TestNoCor()
     {
         Assert.That(CoroutineStaticExt<double>.HasAnyCoroutines(), Is.EqualTo(false));
-        var handle = CoroutineStaticExt<double>.StartCoroutine(_FakeCountingDown(), "Test");
+        var handle = CoroutineStaticExt<double>.StartCoroutine(FakeCountingDown(), "Test");
         CoroutineStaticExt<double>.KillCoroutine(handle);
     }
 
+    [Test]
+    public void TestOtherCor()
+    {
+        var handle = CoroutineStaticExt<double>.StartCoroutine(CountingDown(), "Test");
+        var handle2 = CoroutineStaticExt<double>.StartCoroutine(WaitUntilOtherCor2(handle), "Test");
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        while (!CoroutineStaticExt<double>.IsCoroutineSuccess(handle2))
+        {
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+            {
+                //Log.Information("killing after 10 sec");
+                Assert.Fail();
+            }
+        }
+        stopwatch.Stop();
+        Thread.Sleep(100);
+        Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle2), Is.EqualTo(false));
+        Assert.That(CoroutineStaticExt<double>.IsCoroutineExists(handle), Is.EqualTo(false));
+    }
 
-    public IEnumerator<double> _CountingDown()
+
+    public static IEnumerator<double> CountingDown()
     {
         yield return 0;
         byte i = byte.MaxValue;
@@ -139,7 +159,7 @@ public class CoroutineTest_Double
         //Log.Information("_CountingDown bye bye");
         yield break;
     }
-    public IEnumerator<double> _FakeCountingDown()
+    public static IEnumerator<double> FakeCountingDown()
     {
         yield return CoroutineExt<double>.WaitUntilZero<byte>(
             () =>
@@ -152,7 +172,7 @@ public class CoroutineTest_Double
 
     private bool _TestBoolValue = false;
 
-    public IEnumerator<double> _WaitForTrue()
+    public IEnumerator<double> WaitForTrue()
     {
         //Log.Information("_WaitForTrue! ");
         yield return CoroutineExt<double>.WaitUntilTrue(() => _TestBoolValue);
@@ -161,10 +181,18 @@ public class CoroutineTest_Double
         yield break;
     }
 
-    public IEnumerator<double> _WaitAndSetTrue()
+    public IEnumerator<double> WaitAndSetTrue()
     {
         yield return 2;
         _TestBoolValue = true;
+        yield break;
+    }
+
+    public IEnumerator<double> WaitUntilOtherCor2(CoroutineHandle coroutineHandle)
+    {
+        yield return 2;
+        yield return CoroutineExt<double>.StartAfterCoroutine(coroutineHandle);
+        yield return 1;
         yield break;
     }
 }

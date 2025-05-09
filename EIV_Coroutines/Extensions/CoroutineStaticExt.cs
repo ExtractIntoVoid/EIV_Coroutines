@@ -31,17 +31,13 @@ public static class CoroutineStaticExt<T> where T : IFloatingPoint<T>, IFloating
             Start();
     }
 
-    public static void Start(byte worker = 0, Func<ICoroutineWorker<T>>? func = null)
+    public static void Start(bool useCustom = true, Func<ICoroutineWorker<T>>? func = null)
     {
-        switch (worker)
+        StaticWorker = useCustom switch
         {
-            case 0:
-                StaticWorker = new CoroutineWorkerCustom<T>();
-                break;
-            default:
-                StaticWorker = func?.Invoke();
-                break;
-        }
+            true => new CoroutineWorkerCustom<T>(),
+            _ => func?.Invoke(),
+        };
         StaticWorker?.Init();
     }
 

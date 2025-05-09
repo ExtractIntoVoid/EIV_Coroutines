@@ -3,13 +3,9 @@ using System.Numerics;
 
 namespace EIV_Coroutines;
 
-public struct CoroutineHandle : IEquatable<CoroutineHandle>, IEqualityComparer<CoroutineHandle>
+public readonly struct CoroutineHandle(int hash) : IEquatable<CoroutineHandle>, IEqualityComparer<CoroutineHandle>
 {
-    public int CoroutineHash;
-    public CoroutineHandle(int hash)
-    {
-        CoroutineHash = hash;
-    }
+    public int CoroutineHash { get; } = hash;
 
     public bool Equals(CoroutineHandle other)
     {
@@ -54,7 +50,7 @@ public struct CoroutineHandle : IEquatable<CoroutineHandle>, IEqualityComparer<C
 
     public override bool Equals(object? obj)
     {
-        return obj is CoroutineHandle && Equals((CoroutineHandle)obj);
+        return obj is CoroutineHandle handle && Equals(handle);
     }
 
     public static bool operator ==(CoroutineHandle left, CoroutineHandle right)

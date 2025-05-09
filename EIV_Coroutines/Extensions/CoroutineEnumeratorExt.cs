@@ -54,22 +54,18 @@ public static class CoroutineEnumeratorExt<T> where T : IFloatingPoint<T>, IFloa
         yield return T.NaN;
     }
 
-    public static IEnumerator<T> StartWhenDone(Coroutine<T>? coroutine, IEnumerator<T> pausedProc)
+    public static IEnumerator<T> StartWhenDone(CoroutineHandle? coroutine, IEnumerator<T> pausedProc)
     {
-        yield break;
-        /*
         if (!coroutine.HasValue)
             yield break;
-        coroutine = Instance.CustomCoroutines.Where(x => x.Equals(coroutine)).FirstOrDefault();
-        while (coroutine.Value.IsSuccess != true)
+        while (CoroutineStaticExt<T>.StaticWorker!.IsCoroutineSuccessInstance(coroutine.Value))
         {
-            coroutine = Instance.CustomCoroutines.Where(x => x.Equals(coroutine)).FirstOrDefault();
-            yield return double.NegativeInfinity;
+            yield return T.NegativeInfinity;
         }
-        CoroutineStaticExt.StaticWorker!.ReplacementObject = pausedProc;
-        ReplacementFunction = new Func<IEnumerator<double>, IEnumerator<double>>(ReturnTmpRefForRepFunc);
-        yield return double.NaN;
-        */
+        CoroutineStaticExt<T>.StartIfNotExists();
+        CoroutineStaticExt<T>.StaticWorker!.ReplacementObject = pausedProc;
+        CoroutineStaticExt<T>.StaticWorker!.ReplacementFunction = ReturnTmpRefForRepFunc;
+        yield return T.NaN;
     }
 
     #endregion
@@ -105,7 +101,7 @@ public static class CoroutineEnumeratorExt<T> where T : IFloatingPoint<T>, IFloa
     public static IEnumerator<T> StartAfterCoroutineHelper(IEnumerator<T> coptr)
     {
         CoroutineStaticExt<T>.StartIfNotExists();
-        return StartWhenDone((Coroutine<T>?)CoroutineStaticExt<T>.StaticWorker!.ReplacementObject, coptr);
+        return StartWhenDone((CoroutineHandle?)CoroutineStaticExt<T>.StaticWorker!.ReplacementObject, coptr);
     }
 
     #endregion

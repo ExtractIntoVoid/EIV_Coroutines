@@ -6,7 +6,7 @@ namespace EIV_Coroutines.CoroutineWorkers;
 
 public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
-    private List<(T Delay, Coroutine<T> Cor)> _DelayAndCoroutines = [];
+    private readonly List<(T Delay, Coroutine<T> Cor)> _DelayAndCoroutines = [];
     public List<(T Delay, Coroutine<T> Cor)> DelayAndCoroutines
     {
         get
@@ -28,7 +28,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
 
     #region Private fields
     private Thread? UpdateThread;
-    private Stopwatch Watch = new();
+    private readonly Stopwatch Watch = new();
     private T prevTime = T.Zero;
     private T accumulator = T.Zero;
     #endregion
@@ -57,8 +57,9 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         };
         UpdateThread.Start();
     }
+
     public void Quit()
-    {;
+    {
         Kill();
         UpdateThread?.Interrupt();
         UpdateThread = null;
@@ -67,7 +68,6 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
 
     public void Update(T deltaTime)
     {
-        Console.WriteLine(deltaTime);
         Kill();
         if (MutexLock())
         {
@@ -258,7 +258,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         }
     }
 
-    private bool MoveNext(ref ((T Delay, Coroutine<T> Cor) DelayAndCor, int index) ref_values)
+    private static bool MoveNext(ref ((T Delay, Coroutine<T> Cor) DelayAndCor, int index) ref_values)
     {
         bool result = ref_values.DelayAndCor.Cor.Enumerator.MoveNext();
         ref_values.DelayAndCor.Delay = ref_values.DelayAndCor.Cor.Enumerator.Current;
