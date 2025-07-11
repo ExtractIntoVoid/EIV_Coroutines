@@ -211,11 +211,6 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         if (MutexLock())
         {
             int index = _DelayAndCoroutines.FindIndex(x => coroutine.Equals(CoroutineHandle.AsHandle(x.Cor)));
-            if (index < 0)
-            {
-                MutexUnLock();
-                return -1;
-            }
             MutexUnLock();
             return index;
         }
@@ -232,8 +227,9 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
                 MutexUnLock();
                 return null;
             }
+            var cor = _DelayAndCoroutines[index].Cor;
             MutexUnLock();
-            return _DelayAndCoroutines[index].Cor;
+            return cor;
         }
         return null;
     }
