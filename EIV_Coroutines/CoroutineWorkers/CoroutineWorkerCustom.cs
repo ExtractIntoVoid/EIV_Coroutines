@@ -1,5 +1,4 @@
-﻿using EIV_Coroutines.Extensions;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Numerics;
 
 namespace EIV_Coroutines.CoroutineWorkers;
@@ -46,16 +45,17 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
     }
     #endregion
     #region Basic stuff (Init, Quit, Update)
-
+    ExecutionContext? mainContext;
     public void Init()
     {
         Watch.Start();
-        prevTime = CoroutineStaticExt<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000);
+        prevTime = CoroutineManager<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000);
         UpdateThread = new(ThreadUpdate)
         {
             IsBackground = true
         };
         UpdateThread.Start();
+        mainContext = ExecutionContext.Capture();
     }
 
     public void Quit()
@@ -64,6 +64,12 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         UpdateThread?.Interrupt();
         UpdateThread = null;
         Watch.Stop();
+    }
+
+    private void UpdateObj(object? obj)
+    {
+        //Console.WriteLine("Main thread!");
+        Update((T)obj!);
     }
 
     public void Update(T deltaTime)
@@ -227,13 +233,14 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         if (MutexLock())
         {
             int index = _DelayAndCoroutines.FindIndex(x => coroutine.Equals(CoroutineHandle.AsHandle(x.Cor)));
-            if (index < 0)
+            if (index == -1)
             {
                 MutexUnLock();
                 return null;
             }
+            var cor = _DelayAndCoroutines[index].Cor;
             MutexUnLock();
-            return _DelayAndCoroutines[index].Cor;
+            return cor;
         }
         return null;
     }
@@ -325,14 +332,17 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         {
             if (PauseUpdate)
                 continue;
-            T currTime = CoroutineStaticExt<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000d);
+            T currTime = CoroutineManager<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000d);
             accumulator += currTime - prevTime;
             prevTime = currTime;
 
             if (accumulator > UpdateRate)
             {
                 accumulator -= UpdateRate;
-                Update(UpdateRate);
+                if (mainContext != null)
+                    ExecutionContext.Run(mainContext, UpdateObj, UpdateRate);
+                else
+                    Update(UpdateRate);
             }
         }
     }

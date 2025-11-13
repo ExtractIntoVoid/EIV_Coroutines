@@ -1,9 +1,9 @@
 ﻿using EIV_Coroutines.CoroutineWorkers;
 using System.Numerics;
 
-namespace EIV_Coroutines.Extensions;
+namespace EIV_Coroutines;
 
-public static class CoroutineStaticExt<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
     public static T ReturnTimeAsT(long time)
     {
@@ -22,7 +22,6 @@ public static class CoroutineStaticExt<T> where T : IFloatingPoint<T>, IFloating
             return T.CreateChecked(time);
         return T.Zero;
     }
-
     public static ICoroutineWorker<T>? StaticWorker { get; private set; }
 
     public static void StartIfNotExists()
@@ -57,15 +56,15 @@ public static class CoroutineStaticExt<T> where T : IFloatingPoint<T>, IFloating
 
     public static CoroutineHandle CallDelayed(TimeSpan timeSpan, Action action, string tag = "")
     {
-        return StartCoroutine(CoroutineEnumeratorExt<T>.DelayedCall(timeSpan, action), tag);
+        return StartCoroutine(DelayedCall(timeSpan, action), tag);
     }
     public static CoroutineHandle CallContinuously(Action action, string tag = "")
     {
-        return StartCoroutine(CoroutineEnumeratorExt<T>.CallContinuously(TimeSpan.Zero, action), tag);
+        return StartCoroutine(CallContinuously(TimeSpan.Zero, action), tag);
     }
     public static CoroutineHandle CallPeriodically(TimeSpan timeSpan, Action action, string tag = "")
     {
-        return StartCoroutine(CoroutineEnumeratorExt<T>.CallContinuously(timeSpan, action), tag);
+        return StartCoroutine(CallContinuously(timeSpan, action), tag);
     }
 
     public static void KillCoroutines(IList<CoroutineHandle> coroutines)
@@ -115,3 +114,7 @@ public static class CoroutineStaticExt<T> where T : IFloatingPoint<T>, IFloating
         return StaticWorker!.HasAnyCoroutinesInstance();
     }
 }
+
+public class CoroutineFloatManager : CoroutineManager<float>;
+
+public class CoroutineDoubleManager : CoroutineManager<double>;

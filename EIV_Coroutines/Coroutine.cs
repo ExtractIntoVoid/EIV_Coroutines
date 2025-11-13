@@ -3,8 +3,9 @@ using System.Numerics;
 
 namespace EIV_Coroutines;
 
-public class Coroutine<T>(IEnumerator<T> enumerator, string tag = "")
-    : IEquatable<Coroutine<T>>, IEqualityComparer<Coroutine<T>> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public class Coroutine<T>(IEnumerator<T> enumerator, string tag = "") : 
+    IEquatable<Coroutine<T>>, 
+    IEqualityComparer<Coroutine<T>> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
     public IEnumerator<T> Enumerator = enumerator;
     public bool IsRunning = true;

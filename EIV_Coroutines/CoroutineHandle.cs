@@ -35,12 +35,12 @@ public readonly struct CoroutineHandle(int hash) : IEquatable<CoroutineHandle>, 
 
     public static implicit operator CoroutineHandle(Coroutine<double> coroutine)
     {
-        return new CoroutineHandle(coroutine.GetHashCode());
+        return AsHandle(coroutine);
     }
 
     public static implicit operator CoroutineHandle(Coroutine<float> coroutine)
     {
-        return new CoroutineHandle(coroutine.GetHashCode());
+        return AsHandle(coroutine);
     }
 
     public static CoroutineHandle AsHandle<T>(Coroutine<T> coroutine) where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
