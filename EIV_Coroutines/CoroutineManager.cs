@@ -50,8 +50,7 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
     {
         StartIfNotExists();
         Coroutine<T> coroutine = new(objects, tag);
-        StaticWorker!.AddCoroutineInstance(coroutine);
-        return CoroutineHandle.AsHandle(coroutine);
+        return StaticWorker!.AddCoroutineInstance(coroutine);
     }
 
     public static CoroutineHandle CallDelayed(TimeSpan timeSpan, Action action, string tag = "")

@@ -56,11 +56,22 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
     {
         if (!coroutine.HasValue)
             yield break;
+
         StartIfNotExists();
-        while (StaticWorker!.IsCoroutineSuccessInstance(coroutine.Value))
+        /*
+        // Return to original if no coroutine found.
+        if (!StaticWorker!.IsCoroutineExistsInstance(coroutine.Value))
+        {
+            StaticWorker!.ReplacementObject = pausedProc;
+            StaticWorker!.ReplacementFunction = ReturnTmpRefForRepFunc;
+            yield return T.NaN;
+        }
+        */
+        while (!StaticWorker!.IsCoroutineSuccessInstance(coroutine.Value))
         {
             yield return T.NegativeInfinity;
         }
+
         StaticWorker!.ReplacementObject = pausedProc;
         StaticWorker!.ReplacementFunction = ReturnTmpRefForRepFunc;
         yield return T.NaN;

@@ -3,7 +3,9 @@ using System.Numerics;
 
 namespace EIV_Coroutines;
 
-public readonly struct CoroutineHandle(int hash) : IEquatable<CoroutineHandle>, IEqualityComparer<CoroutineHandle>
+public readonly struct CoroutineHandle(int hash) : 
+    IEquatable<CoroutineHandle>, 
+    IEqualityComparer<CoroutineHandle>
 {
     public int CoroutineHash { get; } = hash;
 
