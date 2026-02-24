@@ -1,28 +1,12 @@
-﻿using EIV_Coroutines.CoroutineWorkers;
+﻿#if NETSTANDARD2_0
+using EIV_Coroutines.CoroutineWorkers;
 using System.Numerics;
 
 namespace EIV_Coroutines;
 
-public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public partial class CoroutineManager
 {
-    public static T ReturnTimeAsT(long time)
-    {
-        if (typeof(T) == typeof(float))
-            return T.CreateChecked((float)time);
-        if (typeof(T) == typeof(double))
-            return T.CreateChecked((double)time);
-        return T.Zero;
-    }
-
-    public static T ReturnTimeAsT(double time)
-    {
-        if (typeof(T) == typeof(float))
-            return T.CreateChecked((float)time);
-        if (typeof(T) == typeof(double))
-            return T.CreateChecked(time);
-        return T.Zero;
-    }
-    public static ICoroutineWorker<T>? StaticWorker { get; private set; }
+    public static ICoroutineWorker? StaticWorker { get; private set; }
 
     public static void StartIfNotExists()
     {
@@ -30,11 +14,11 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
             Start();
     }
 
-    public static void Start(bool useCustom = true, Func<ICoroutineWorker<T>>? func = null)
+    public static void Start(bool useDefault = true, Func<ICoroutineWorker>? func = null)
     {
-        StaticWorker = useCustom switch
+        StaticWorker = useDefault switch
         {
-            true => new CoroutineWorkerCustom<T>(),
+            true => new CoroutineWorkerCustom(),
             _ => func?.Invoke(),
         };
         StaticWorker?.Init();
@@ -46,10 +30,10 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
         StaticWorker = null;
     }
 
-    public static CoroutineHandle StartCoroutine(IEnumerator<T> objects, string tag = "")
+    public static CoroutineHandle StartCoroutine(IEnumerator<float> objects, string tag = "")
     {
         StartIfNotExists();
-        Coroutine<T> coroutine = new(objects, tag);
+        Coroutine coroutine = new(objects, tag);
         return StaticWorker!.AddCoroutineInstance(coroutine);
     }
 
@@ -114,6 +98,5 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
     }
 }
 
-public class CoroutineFloatManager : CoroutineManager<float>;
-
-public class CoroutineDoubleManager : CoroutineManager<double>;
+public class CoroutineFloatManager : CoroutineManager;
+#endif

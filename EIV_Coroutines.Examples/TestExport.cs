@@ -1,4 +1,5 @@
-﻿using EIV_Coroutines.CoroutineWorkers;
+﻿#if NET8_0_OR_GREATER
+using EIV_Coroutines.CoroutineWorkers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -44,3 +45,4 @@ internal class TestExport
         yield break;
     }
 }
+#endif

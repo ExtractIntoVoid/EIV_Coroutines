@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if NETSTANDARD2_0
 using System.Numerics;
 
 namespace EIV_Coroutines;
@@ -6,17 +6,14 @@ namespace EIV_Coroutines;
 /// <summary>
 /// Represent a Coroutine instance.
 /// </summary>
-/// <typeparam name="T">Any floating point type.</typeparam>
-public class Coroutine<T> : 
-    IEquatable<Coroutine<T>>, 
-    IEqualityComparer<Coroutine<T>> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public class Coroutine
 {
     private static int Increment;
 
     /// <summary>
     /// The current delay the coroutine should wait until running again.
     /// </summary>
-    public T Delay { get; internal set; } = T.Zero;
+    public float Delay { get; internal set; } = 0f;
 
     /// <summary>
     /// The tag for distinge between other coroutines
@@ -26,12 +23,12 @@ public class Coroutine<T> :
     /// <summary>
     /// The Enumerator that was created.
     /// </summary>
-    public IEnumerator<T> BaseEnumerator { get; }
+    public IEnumerator<float> BaseEnumerator { get; }
 
     /// <summary>
     /// The current enumerator.
     /// </summary>
-    public IEnumerator<T> Enumerator;
+    public IEnumerator<float> Enumerator;
 
     /// <summary>
     /// Gets whenever this coroutine is running.
@@ -58,7 +55,7 @@ public class Coroutine<T> :
     /// </summary>
     /// <param name="enumerator"></param>
     /// <param name="tag"></param>
-    public Coroutine(IEnumerator<T> enumerator, string tag = "")
+    public Coroutine(IEnumerator<float> enumerator, string tag = "")
     {
         Interlocked.Increment(ref Increment);
         Enumerator = enumerator;
@@ -74,12 +71,12 @@ public class Coroutine<T> :
             0;
     }
 
-    public bool Equals(Coroutine<T>? x, Coroutine<T>? y)
+    public bool Equals(Coroutine? x, Coroutine? y)
     {
         return x?.GetHashCode() == y?.GetHashCode();
     }
 
-    public int GetHashCode([DisallowNull] Coroutine<T> obj)
+    public int GetHashCode(Coroutine obj)
     {
         return obj.GetHashCode();
     }
@@ -95,17 +92,17 @@ public class Coroutine<T> :
     /// <inheritdoc/>
     public override bool Equals(object? obj)
     {
-        return obj is Coroutine<T> coroutine && Equals(coroutine);
+        return obj is Coroutine coroutine && Equals(coroutine);
     }
 
-    public bool Equals(Coroutine<T>? other)
+    public bool Equals(Coroutine? other)
     {
         return GetHashCode() == other?.GetHashCode();
     }
 
 
     /// <inheritdoc/>
-    public static bool operator ==(Coroutine<T>? left, Coroutine<T>? right)
+    public static bool operator ==(Coroutine? left, Coroutine? right)
     {
         if (left is null)
             return false;
@@ -114,8 +111,9 @@ public class Coroutine<T> :
 
 
     /// <inheritdoc/>
-    public static bool operator !=(Coroutine<T>? left, Coroutine<T>? right)
+    public static bool operator !=(Coroutine? left, Coroutine? right)
     {
         return !(left == right);
     }
 }
+#endif

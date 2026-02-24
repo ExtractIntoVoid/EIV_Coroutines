@@ -1,19 +1,20 @@
-﻿using System.Collections.Concurrent;
+﻿#if NETSTANDARD2_0
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Numerics;
 
 namespace EIV_Coroutines.CoroutineWorkers;
 
-public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public class CoroutineWorkerCustom : ICoroutineWorker
 {
-    private readonly ConcurrentDictionary<CoroutineHandle, Coroutine<T>> SafeCoroutines = [];
+    private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> SafeCoroutines = [];
     public object? ReplacementObject { get; set; }
-    public Func<IEnumerator<T>, IEnumerator<T>>? ReplacementFunction { get; set; }
+    public Func<IEnumerator<float>, IEnumerator<float>>? ReplacementFunction { get; set; }
     public bool PauseUpdate { get; set; } = false;
     public bool KillOnSuccess { get; set; } = true;
-    public static T UpdateRate { get; set; } = T.One;
+    public static float UpdateRate { get; set; } = 1f;
 
-    public IEnumerable<Coroutine<T>> Coroutines
+    public IEnumerable<Coroutine> Coroutines
     {
         get
         {
@@ -24,22 +25,22 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
     #region Private fields
     private Thread? UpdateThread;
     private readonly Stopwatch Watch = new();
-    private T prevTime = T.Zero;
-    private T accumulator = T.Zero;
+    private float prevTime = 0f;
+    private float accumulator = 0f;
     #endregion
 
     #region Basic stuff (Init, Quit, Update)
-    ExecutionContext? mainContext;
+    SynchronizationContext? mainContext;
     public void Init()
     {
         Watch.Start();
-        prevTime = CoroutineManager<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000);
+        prevTime = Watch.ElapsedMilliseconds / 1000;
         UpdateThread = new(ThreadUpdate)
         {
             IsBackground = true
         };
         UpdateThread.Start();
-        mainContext = ExecutionContext.Capture();
+        mainContext = SynchronizationContext.Current;
     }
 
     public void Quit()
@@ -52,10 +53,10 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
 
     private void UpdateObj(object? obj)
     {
-        Update((T)obj!);
+        Update((float)obj!);
     }
 
-    public void Update(T deltaTime)
+    public void Update(float deltaTime)
     {
         Kill();
 
@@ -67,20 +68,20 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         Kill();
     }
 
-    private void UpdateLogic(CoroutineHandle handle, Coroutine<T> coroutine, T deltaTime)
+    private void UpdateLogic(CoroutineHandle handle, Coroutine coroutine, float deltaTime)
     {
         // IF the delay for it is not zero, we remove from current delta.
-        if (coroutine.Delay > T.Zero)
+        if (coroutine.Delay > 0f)
             coroutine.Delay -= deltaTime;
 
         // IF the delay is zero OR smaller (means we got negative time) we work on it.
-        if (coroutine.Delay <= T.Zero)
+        if (coroutine.Delay <= 0f)
         {
             Work(handle, coroutine);
         }
 
         // IF the delay is NaN we should use the replacementFunction for it!
-        if (T.IsNaN(coroutine.Delay) && ReplacementFunction != null)
+        if (float.IsNaN(coroutine.Delay) && ReplacementFunction != null)
         {
             coroutine.Enumerator = ReplacementFunction(coroutine.Enumerator);
             Work(handle, coroutine);
@@ -88,7 +89,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         }
     }
 
-    private void Work(CoroutineHandle handle, Coroutine<T> coroutine)
+    private void Work(CoroutineHandle handle, Coroutine coroutine)
     {
         if (coroutine is { IsPaused: true } or { IsSuccess: true } or { ShouldKill: true })
             return;
@@ -172,15 +173,15 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         SafeCoroutines[coroutine] = cor;
     }
 
-    public CoroutineHandle AddCoroutineInstance(Coroutine<T> coroutine)
+    public CoroutineHandle AddCoroutineInstance(Coroutine coroutine)
     {
-        coroutine.Delay = T.Zero;
+        coroutine.Delay = 0f;
         CoroutineHandle handle = CoroutineHandle.AsHandle(coroutine);
         SafeCoroutines.TryAdd(handle, coroutine);
         return handle;
     }
 
-    public Coroutine<T>? GetCoroutine(CoroutineHandle handle)
+    public Coroutine? GetCoroutine(CoroutineHandle handle)
     {
         if (SafeCoroutines.TryGetValue(handle, out var coroutine))
             return coroutine;
@@ -207,7 +208,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
         {
             if (PauseUpdate)
                 continue;
-            T currTime = CoroutineManager<T>.ReturnTimeAsT(Watch.ElapsedMilliseconds / 1000d);
+            float currTime = (float)(Watch.ElapsedMilliseconds / 1000d);
             accumulator += currTime - prevTime;
             prevTime = currTime;
 
@@ -215,7 +216,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
             {
                 accumulator -= UpdateRate;
                 if (mainContext != null)
-                    ExecutionContext.Run(mainContext, UpdateObj, UpdateRate);
+                    mainContext.Send(UpdateObj, UpdateRate);
                 else
                     Update(UpdateRate);
             }
@@ -223,3 +224,4 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T> where T : IFloatingP
     }
     #endregion
 }
+#endif

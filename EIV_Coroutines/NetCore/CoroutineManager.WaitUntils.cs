@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#if NET5_0_OR_GREATER
+using System.Numerics;
 
 namespace EIV_Coroutines;
 
@@ -49,3 +50,4 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
         return T.Zero;
     }
 }
+#endif

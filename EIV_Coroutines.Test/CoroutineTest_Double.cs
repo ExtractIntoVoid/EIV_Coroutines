@@ -1,4 +1,5 @@
-﻿using EIV_Coroutines.CoroutineWorkers;
+﻿#if NET5_0_OR_GREATER
+using EIV_Coroutines.CoroutineWorkers;
 using System.Diagnostics;
 
 namespace EIV_Coroutines.Test;
@@ -219,3 +220,4 @@ public class CoroutineTest_Double
         yield break;
     }
 }
+#endif

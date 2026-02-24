@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#if NET5_0_OR_GREATER
+using System.Numerics;
 
 namespace EIV_Coroutines.CoroutineWorkers;
 
@@ -36,3 +37,4 @@ public interface ICoroutineWorker<T> where T : IFloatingPoint<T>, IFloatingPoint
     bool HasAnyCoroutinesInstance();
     Coroutine<T>? GetCoroutine(CoroutineHandle coroutine);
 }
+#endif

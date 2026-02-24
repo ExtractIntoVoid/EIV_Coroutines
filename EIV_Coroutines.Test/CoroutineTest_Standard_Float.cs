@@ -1,16 +1,16 @@
-﻿#if NET5_0_OR_GREATER
+﻿#if NET47_OR_GREATER
 using EIV_Coroutines.CoroutineWorkers;
 using System.Diagnostics;
 
 namespace EIV_Coroutines.Test;
 
-public class CoroutineTest_Float
+public class CoroutineTest_Standard_Float
 {
     [OneTimeSetUp]
     public void SetUp()
     {
         // This exist here to make our test faster, running at 144 fps
-        CoroutineWorkerCustom<float>.UpdateRate = 1 / 144f;
+        CoroutineWorkerCustom.UpdateRate = 1 / 144f;
         CoroutineFloatManager.Start();
 
     }
@@ -34,9 +34,9 @@ public class CoroutineTest_Float
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineFloatManager.IsCoroutineSuccess(handle))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
             {
-                //Log.Information("killing after 15 sec");
+                //Log.Information("killing after 10 sec");
                 Assert.Fail();
             }
         }
@@ -158,12 +158,12 @@ public class CoroutineTest_Float
         yield return 0;
         byte i = byte.MaxValue;
         //Log.Information("_CountingDown set i to byte max");
-        yield return CoroutineFloatManager.WaitUntilZero<byte>(
+        yield return CoroutineFloatManager.WaitUntilTrue(
             () =>
             {
                 i--;
                 //Log.Information("i: "+i);
-                return i;
+                return i == 0;
             });
         yield return 0;
         //Log.Information("_CountingDown bye bye");
@@ -171,10 +171,10 @@ public class CoroutineTest_Float
     }
     private static IEnumerator<float> FakeCountingDown()
     {
-        yield return CoroutineFloatManager.WaitUntilZero<byte>(
+        yield return CoroutineFloatManager.WaitUntilTrue(
             () =>
             {
-                return 1;
+                return false;
             });
         yield return 0;
         yield break;

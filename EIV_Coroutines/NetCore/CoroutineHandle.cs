@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿#if NET5_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace EIV_Coroutines;
@@ -70,3 +71,4 @@ public readonly struct CoroutineHandle(int hash) :
         return $"Hash: {CoroutineHash}";
     }
 }
+#endif

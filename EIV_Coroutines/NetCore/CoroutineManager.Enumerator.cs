@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿#if NET5_0_OR_GREATER
+using System.Numerics;
 
 namespace EIV_Coroutines;
 
@@ -11,7 +12,7 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
 
     public static IEnumerator<T> DelayedCall(TimeSpan timeSpan, Action action)
     {
-        yield return ReturnTimeAsT(timeSpan.TotalSeconds);
+        yield return T.CreateChecked(timeSpan.TotalSeconds);
         action();
     }
 
@@ -19,7 +20,7 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
     {
         while (true)
         {
-            yield return ReturnTimeAsT(timeSpan.TotalSeconds);
+            yield return T.CreateChecked(timeSpan.TotalSeconds);
             action();
         }
     }
@@ -111,3 +112,4 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
         return StartWhenDone((CoroutineHandle?)StaticWorker!.ReplacementObject, coptr);
     }
 }
+#endif
