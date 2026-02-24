@@ -1,7 +1,5 @@
 name: Publish Package
 
-name: Publish Package
-
 on:
   push:
     tags:
@@ -12,8 +10,8 @@ on:
 jobs:
   build:
     permissions:
-      contents: read
-      packages: read
+      contents: write
+      packages: write
     uses: ExtractIntoVoid/workflows/.github/workflows/package.yml@main
     with:
       ProjName: EIV_Coroutines
