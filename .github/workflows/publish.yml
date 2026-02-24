@@ -1,16 +1,11 @@
 name: Publish Package
 
+name: Publish Package
+
 on:
   push:
-    paths-ignore:
-      - '.github/*'
-      - '*.md'
-      - "*.yml"
-  pull_request:
-    paths-ignore:
-      - '.github/*'
-      - '*.md'
-      - "*.yml"
+    tags:
+      - "release-*"
   workflow_dispatch:
     # allow manual trigger
 
