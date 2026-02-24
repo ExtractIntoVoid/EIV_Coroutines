@@ -1,33 +1,24 @@
-name: Build
+name: Build Solution
 
 on:
   push:
-    branches: [ "main" ]
+    paths-ignore:
+      - '.github/*'
+      - '*.md'
+      - "*.yml"
   pull_request:
-    branches: [ "main" ]
+    paths-ignore:
+      - '.github/*'
+      - '*.md'
+      - "*.yml"
   workflow_dispatch:
-# allow manual trigger
+    # allow manual trigger
 
 jobs:
   build:
-    runs-on: windows-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-
-    - name: Build
-      run: dotnet build -o Out
-
-    - name: Test
-      run: dotnet test -o Out
-
-    - name : Upload
-      uses: actions/upload-artifact@v4.3.5
-      with:
-        name: EIV_Coroutines
-        path: Out/*
+    permissions:
+      contents: read
+      packages: read
+    uses: ExtractIntoVoid/workflows/.github/workflows/build_sln.yml@main
+    secrets:
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
