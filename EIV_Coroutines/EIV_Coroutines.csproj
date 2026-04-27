@@ -20,10 +20,9 @@
     <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
     <EnableAotAnalyzer>true</EnableAotAnalyzer>
     <IsAotCompatible>true</IsAotCompatible>
-
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,4 +30,10 @@
     <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+	<Target Name="SetSourceRevisionId" BeforeTargets="InitializeSourceControlInformation">
+		<Exec Command="git describe --long --always --exclude=* --abbrev=8" ConsoleToMSBuild="True" IgnoreExitCode="False">
+			<Output PropertyName="SourceRevisionId" TaskParameter="ConsoleOutput" />
+		</Exec>
+	</Target>
+	
 </Project>
