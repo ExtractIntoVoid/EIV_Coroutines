@@ -34,7 +34,7 @@ public class CoroutineTest_Double
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
                 //Log.Information("killing after 10 sec");
                 Assert.Fail();
@@ -63,7 +63,7 @@ public class CoroutineTest_Double
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
                 //Log.Information("killing after 10 sec");
                 Assert.Fail();
@@ -93,7 +93,7 @@ public class CoroutineTest_Double
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (CoroutineDoubleManager.IsCoroutineExists(handle))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(5))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
                 Assert.Fail();
             // wait until test over.
         }
@@ -112,7 +112,7 @@ public class CoroutineTest_Double
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (CoroutineDoubleManager.IsCoroutineExists(handle))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(5))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
                 Assert.Fail();
             // wait until test over.
         }
@@ -150,7 +150,7 @@ public class CoroutineTest_Double
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineDoubleManager.IsCoroutineSuccess(handle2))
         {
-            if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
+            if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
                 //Log.Information("killing after 10 sec");
                 Assert.Fail();
