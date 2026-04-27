@@ -1,10 +1,11 @@
 ﻿#if NETSTANDARD2_0
-using System.Numerics;
-
 namespace EIV_Coroutines;
 
 public partial class CoroutineManager
 {
+    /// <summary>
+    /// Waits until <paramref name="evaluatorFunc"/> returns <see langword="false"/>.
+    /// </summary>
     public static float WaitUntilFalse(Func<bool> evaluatorFunc)
     {
         if (evaluatorFunc == null || !evaluatorFunc())
@@ -16,6 +17,9 @@ public partial class CoroutineManager
         return float.NaN;
     }
 
+    /// <summary>
+    /// Waits until <paramref name="evaluatorFunc"/> returns <see langword="true"/>.
+    /// </summary>
     public static float WaitUntilTrue(Func<bool> evaluatorFunc)
     {
         if (evaluatorFunc == null || evaluatorFunc())
@@ -27,6 +31,9 @@ public partial class CoroutineManager
         return float.NaN;
     }
 
+    /// <summary>
+    /// Waits until <paramref name="coroutine"/> successfully run.
+    /// </summary>
     public static float StartAfterCoroutine(CoroutineHandle coroutine)
     {
         StartIfNotExists();

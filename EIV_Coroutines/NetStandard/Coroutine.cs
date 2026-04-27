@@ -1,12 +1,12 @@
 ﻿#if NETSTANDARD2_0
-using System.Numerics;
-
 namespace EIV_Coroutines;
 
 /// <summary>
 /// Represent a Coroutine instance.
 /// </summary>
-public class Coroutine
+public class Coroutine : 
+    IEquatable<Coroutine>,
+    IEqualityComparer<Coroutine>
 {
     private static int Increment;
 
@@ -71,11 +71,13 @@ public class Coroutine
             0;
     }
 
+    /// <inheritdoc/>
     public bool Equals(Coroutine? x, Coroutine? y)
     {
         return x?.GetHashCode() == y?.GetHashCode();
     }
 
+    /// <inheritdoc/>
     public int GetHashCode(Coroutine obj)
     {
         return obj.GetHashCode();
@@ -95,6 +97,7 @@ public class Coroutine
         return obj is Coroutine coroutine && Equals(coroutine);
     }
 
+    /// <inheritdoc/>
     public bool Equals(Coroutine? other)
     {
         return GetHashCode() == other?.GetHashCode();

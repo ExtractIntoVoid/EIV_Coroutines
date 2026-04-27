@@ -75,11 +75,13 @@ public class Coroutine<T> :
             0;
     }
 
+    /// <inheritdoc/>
     public bool Equals(Coroutine<T>? x, Coroutine<T>? y)
     {
         return x?.GetHashCode() == y?.GetHashCode();
     }
 
+    /// <inheritdoc/>
     public int GetHashCode([DisallowNull] Coroutine<T> obj)
     {
         return obj.GetHashCode();
@@ -99,6 +101,7 @@ public class Coroutine<T> :
         return obj is Coroutine<T> coroutine && Equals(coroutine);
     }
 
+    /// <inheritdoc/>
     public bool Equals(Coroutine<T>? other)
     {
         return GetHashCode() == other?.GetHashCode();
@@ -108,8 +111,12 @@ public class Coroutine<T> :
     /// <inheritdoc/>
     public static bool operator ==(Coroutine<T>? left, Coroutine<T>? right)
     {
+        if (left is null && right is null)
+            return true;
+
         if (left is null)
             return false;
+
         return left.Equals(right);
     }
 

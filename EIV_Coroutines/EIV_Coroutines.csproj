@@ -22,6 +22,8 @@
     <IsAotCompatible>true</IsAotCompatible>
 
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

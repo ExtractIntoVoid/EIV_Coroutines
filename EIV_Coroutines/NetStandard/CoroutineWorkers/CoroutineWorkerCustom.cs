@@ -1,19 +1,34 @@
 ﻿#if NETSTANDARD2_0
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace EIV_Coroutines.CoroutineWorkers;
 
+/// <summary>
+/// Custom worker.
+/// </summary>
 public class CoroutineWorkerCustom : ICoroutineWorker
 {
     private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> SafeCoroutines = [];
+
+    /// <inheritdoc />
     public object? ReplacementObject { get; set; }
+
+    /// <inheritdoc />
     public Func<IEnumerator<float>, IEnumerator<float>>? ReplacementFunction { get; set; }
+
+    /// <inheritdoc />
     public bool PauseUpdate { get; set; } = false;
+
+    /// <inheritdoc />
     public bool KillOnSuccess { get; set; } = true;
+
+    /// <summary>
+    /// Gets or sets the current update rate.
+    /// </summary>
     public static float UpdateRate { get; set; } = 1f;
 
+    /// <inheritdoc />
     public IEnumerable<Coroutine> Coroutines
     {
         get
@@ -31,6 +46,8 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
     #region Basic stuff (Init, Quit, Update)
     SynchronizationContext? mainContext;
+
+    /// <inheritdoc />
     public void Init()
     {
         Watch.Start();
@@ -43,6 +60,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         mainContext = SynchronizationContext.Current;
     }
 
+    /// <inheritdoc />
     public void Quit()
     {
         Kill();
@@ -53,10 +71,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
     private void UpdateObj(object? obj)
     {
-        Update((float)obj!);
+        UpdateDT((float)obj!);
     }
 
-    public void Update(float deltaTime)
+    /// <inheritdoc />
+    public void UpdateDT(float deltaTime)
     {
         Kill();
 
@@ -114,6 +133,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
     #endregion
     #region Kills
+    /// <inheritdoc />
     public void KillCoroutineInstance(CoroutineHandle coroutine)
     {
         var cor = GetCoroutine(coroutine);
@@ -123,6 +143,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         SafeCoroutines[coroutine] = cor;
     }
 
+    /// <inheritdoc />
     public void KillCoroutinesInstance(IList<CoroutineHandle> coroutines)
     {
         foreach (CoroutineHandle coroutine in coroutines)
@@ -131,6 +152,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         }
     }
 
+    /// <inheritdoc />
     public void KillCoroutineTagInstance(string tag)
     {
         var cors = SafeCoroutines.Where(x => x.Value.Tag == tag).Select(x => x.Key).ToList();
@@ -138,16 +160,19 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     }
     #endregion
     #region Checks
+    /// <inheritdoc />
     public bool HasAnyCoroutinesInstance()
     {
         return !SafeCoroutines.IsEmpty;
     }
 
+    /// <inheritdoc />
     public bool IsCoroutineExistsInstance(CoroutineHandle coroutine)
     {
         return SafeCoroutines.ContainsKey(coroutine);
     }
 
+    /// <inheritdoc />
     public bool IsCoroutineSuccessInstance(CoroutineHandle coroutine)
     {
         var cor = GetCoroutine(coroutine);
@@ -155,6 +180,8 @@ public class CoroutineWorkerCustom : ICoroutineWorker
             return false;
         return cor.IsSuccess;
     }
+
+    /// <inheritdoc />
     public bool IsCoroutineRunningInstance(CoroutineHandle coroutine)
     {
         var cor = GetCoroutine(coroutine);
@@ -164,6 +191,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     }
     #endregion
     #region Other Coroutine stuff
+    /// <inheritdoc />
     public void PauseCoroutineInstance(CoroutineHandle coroutine)
     {
         var cor = GetCoroutine(coroutine);
@@ -173,6 +201,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         SafeCoroutines[coroutine] = cor;
     }
 
+    /// <inheritdoc />
     public CoroutineHandle AddCoroutineInstance(Coroutine coroutine)
     {
         coroutine.Delay = 0f;
@@ -181,6 +210,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         return handle;
     }
 
+    /// <inheritdoc />
     public Coroutine? GetCoroutine(CoroutineHandle handle)
     {
         if (SafeCoroutines.TryGetValue(handle, out var coroutine))
@@ -218,7 +248,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
                 if (mainContext != null)
                     mainContext.Send(UpdateObj, UpdateRate);
                 else
-                    Update(UpdateRate);
+                    UpdateDT(UpdateRate);
             }
         }
     }

@@ -3,8 +3,12 @@ using System.Numerics;
 
 namespace EIV_Coroutines;
 
-public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
+public partial class CoroutineManager<T> 
+    where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
+    /// <summary>
+    /// Waits until <paramref name="evaluatorFunc"/> returns <see langword="false"/>.
+    /// </summary>
     public static T WaitUntilFalse(Func<bool> evaluatorFunc)
     {
         if (evaluatorFunc == null || !evaluatorFunc())
@@ -16,6 +20,9 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
         return T.NaN;
     }
 
+    /// <summary>
+    /// Waits until <paramref name="evaluatorFunc"/> returns <see langword="true"/>.
+    /// </summary>
     public static T WaitUntilTrue(Func<bool> evaluatorFunc)
     {
         if (evaluatorFunc == null || evaluatorFunc())
@@ -27,6 +34,9 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
         return T.NaN;
     }
 
+    /// <summary>
+    /// Waits until <paramref name="evaluatorFunc"/> returns <see cref="INumberBase{TSelf}.Zero"/>.
+    /// </summary>
     public static T WaitUntilZero<Number>(Func<Number> evaluatorFunc) where Number : INumber<Number>
     {
         if (evaluatorFunc() == Number.Zero)
@@ -34,10 +44,13 @@ public partial class CoroutineManager<T> where T : IFloatingPoint<T>, IFloatingP
 
         StartIfNotExists();
         StaticWorker!.ReplacementObject = evaluatorFunc;
-        StaticWorker!.ReplacementFunction = WaitUntilTHelper<Number>;
+        StaticWorker!.ReplacementFunction = WaitUntilZeroHelper<Number>;
         return T.NaN;
     }
 
+    /// <summary>
+    /// Waits until <paramref name="coroutine"/> successfully run.
+    /// </summary>
     public static T StartAfterCoroutine(CoroutineHandle coroutine)
     {
         StartIfNotExists();
