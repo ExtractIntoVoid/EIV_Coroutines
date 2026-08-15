@@ -54,6 +54,7 @@ public class CoroutineTest_Double
     [Test]
     public void TestWaitFor()
     {
+        _TestBoolValue = false;
         var handle = CoroutineDoubleManager.StartCoroutine(WaitForTrue(), "_WaitForTrue");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.Zero);

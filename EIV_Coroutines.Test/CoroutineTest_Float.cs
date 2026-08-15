@@ -10,7 +10,7 @@ public class CoroutineTest_Float
     public void SetUp()
     {
         // This exist here to make our test faster, running at 144 fps
-        CoroutineWorkerCustom<float>.UpdateRate = 1 / 144f;
+        CoroutineWorkerCustom<float>.UpdateRate = 1 / 60f;
         CoroutineFloatManager.Start();
 
     }
@@ -54,6 +54,7 @@ public class CoroutineTest_Float
     [Test]
     public void TestWaitFor()
     {
+        _TestBoolValue = false;
         var handle = CoroutineFloatManager.StartCoroutine(WaitForTrue(), "_WaitForTrue");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.Zero);
@@ -132,10 +133,10 @@ public class CoroutineTest_Float
     [Test]
     public void TestOtherCor()
     {
-        var handle = CoroutineFloatManager.StartCoroutine(CountingDown(), "Test");
-        var handle2 = CoroutineFloatManager.StartCoroutine(WaitUntilOtherCor2(handle), "Test");
+        var countDown = CoroutineFloatManager.StartCoroutine(CountingDown(), "Test");
+        var waitOther = CoroutineFloatManager.StartCoroutine(WaitUntilOtherCor2(countDown), "Test");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineFloatManager.IsCoroutineSuccess(handle2))
+        while (!CoroutineFloatManager.IsCoroutineSuccess(waitOther))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
@@ -147,9 +148,10 @@ public class CoroutineTest_Float
         Thread.Sleep(100);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(CoroutineFloatManager.IsCoroutineExists(handle2), Is.False);
-            Assert.That(CoroutineFloatManager.IsCoroutineExists(handle), Is.False);
+            Assert.That(CoroutineFloatManager.IsCoroutineExists(waitOther), Is.False);
+            Assert.That(CoroutineFloatManager.IsCoroutineExists(countDown), Is.True);
         }
+        CoroutineFloatManager.KillCoroutines([waitOther, countDown]);
     }
 
 
