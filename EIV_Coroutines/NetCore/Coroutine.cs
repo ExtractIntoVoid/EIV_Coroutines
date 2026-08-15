@@ -17,7 +17,7 @@ public class Coroutine<T> :
     /// <summary>
     /// The current delay the coroutine should wait until running again.
     /// </summary>
-    public T Delay { get; internal set; } = T.Zero;
+    public T Delay { get; set; } = T.Zero;
 
     /// <summary>
     /// The tag for distinge between other coroutines

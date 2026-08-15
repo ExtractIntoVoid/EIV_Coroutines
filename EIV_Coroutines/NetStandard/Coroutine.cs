@@ -13,7 +13,7 @@ public class Coroutine :
     /// <summary>
     /// The current delay the coroutine should wait until running again.
     /// </summary>
-    public float Delay { get; internal set; } = 0f;
+    public float Delay { get; set; } = 0f;
 
     /// <summary>
     /// The tag for distinge between other coroutines
