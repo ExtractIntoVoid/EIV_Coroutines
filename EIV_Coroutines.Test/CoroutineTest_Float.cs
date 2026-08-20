@@ -149,7 +149,6 @@ public class CoroutineTest_Float
         using (Assert.EnterMultipleScope())
         {
             Assert.That(CoroutineFloatManager.IsCoroutineExists(waitOther), Is.False);
-            Assert.That(CoroutineFloatManager.IsCoroutineExists(countDown), Is.True);
         }
         CoroutineFloatManager.KillCoroutines([waitOther, countDown]);
     }

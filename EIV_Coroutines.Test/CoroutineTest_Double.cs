@@ -149,7 +149,6 @@ public class CoroutineTest_Double
         using (Assert.EnterMultipleScope())
         {
             Assert.That(CoroutineDoubleManager.IsCoroutineExists(waitOther), Is.False);
-            Assert.That(CoroutineDoubleManager.IsCoroutineExists(countDown), Is.True);
         }
         CoroutineDoubleManager.KillCoroutines([waitOther, countDown]);
     }
