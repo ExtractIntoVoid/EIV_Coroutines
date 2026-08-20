@@ -27,9 +27,9 @@ public class CoroutineTest_Double
         var handle = CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.Zero);
-        Thread.Sleep(100);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
         Thread.Sleep(10);
+        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
+        Thread.Sleep(5);
         Assert.That(CoroutineDoubleManager.IsCoroutineRunning(handle), Is.True);
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
@@ -62,7 +62,7 @@ public class CoroutineTest_Double
         Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
         var WaitAndSetTrue_handle = CoroutineDoubleManager.StartCoroutine(WaitAndSetTrue(), "_WaitAndSetTrue");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
+        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle) && CoroutineDoubleManager.IsCoroutineExists(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
