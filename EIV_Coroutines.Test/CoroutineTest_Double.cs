@@ -136,7 +136,7 @@ public class CoroutineTest_Double
         var countDown = CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
         var waitOther = CoroutineDoubleManager.StartCoroutine(WaitUntilOtherCor2(countDown), "Test");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineDoubleManager.IsCoroutineSuccess(waitOther))
+        while (!CoroutineDoubleManager.IsCoroutineSuccess(waitOther) && CoroutineDoubleManager.IsCoroutineExists(waitOther))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
