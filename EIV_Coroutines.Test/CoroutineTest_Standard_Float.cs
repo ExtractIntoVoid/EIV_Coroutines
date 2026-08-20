@@ -135,7 +135,7 @@ public class CoroutineTest_Standard_Float
         var handle = CoroutineFloatManager.StartCoroutine(CountingDown(), "Test");
         var handle2 = CoroutineFloatManager.StartCoroutine(WaitUntilOtherCor2(handle), "Test");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineFloatManager.IsCoroutineSuccess(handle2))
+        while (!CoroutineFloatManager.IsCoroutineSuccess(handle2) && CoroutineFloatManager.IsCoroutineExists(handle2))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {

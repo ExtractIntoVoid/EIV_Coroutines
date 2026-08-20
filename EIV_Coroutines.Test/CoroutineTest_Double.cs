@@ -25,12 +25,14 @@ public class CoroutineTest_Double
     public void TestWaitCountdown()
     {
         var handle = CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
-        Assert.That(handle, Is.Not.Zero);
-        Assert.That(handle.CoroutineHash, Is.Not.Zero);
-        Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
         Thread.Sleep(5);
-        Assert.That(CoroutineDoubleManager.IsCoroutineRunning(handle), Is.True);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(handle, Is.Not.Zero);
+            Assert.That(handle.CoroutineHash, Is.Not.Zero);
+            Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
+            Assert.That(CoroutineDoubleManager.IsCoroutineRunning(handle), Is.True);
+        }
         Stopwatch stopwatch = Stopwatch.StartNew();
         while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
         {
