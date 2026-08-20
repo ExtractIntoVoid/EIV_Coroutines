@@ -53,6 +53,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
     /// <inheritdoc />
     public void Init()
     {
+        SafeCoroutines.Clear();
         Watch.Start();
         prevTime = T.CreateChecked(Watch.ElapsedMilliseconds / 1000);
         UpdateThread = new(ThreadUpdate)
