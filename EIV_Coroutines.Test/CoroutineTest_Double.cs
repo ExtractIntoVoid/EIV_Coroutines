@@ -34,7 +34,7 @@ public class CoroutineTest_Double
             Assert.That(CoroutineDoubleManager.IsCoroutineRunning(handle), Is.True);
         }
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle))
+        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle) && CoroutineDoubleManager.IsCoroutineExists(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
