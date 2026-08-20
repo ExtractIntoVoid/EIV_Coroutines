@@ -32,7 +32,7 @@ public class CoroutineTest_Standard_Float
         Thread.Sleep(10);
         Assert.That(CoroutineFloatManager.IsCoroutineRunning(handle), Is.True);
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineFloatManager.IsCoroutineSuccess(handle))
+        while (!CoroutineFloatManager.IsCoroutineSuccess(handle) && CoroutineFloatManager.IsCoroutineExists(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
@@ -61,7 +61,7 @@ public class CoroutineTest_Standard_Float
         Assert.That(CoroutineFloatManager.IsCoroutineExists(handle), Is.True);
         var WaitAndSetTrue_handle = CoroutineFloatManager.StartCoroutine(WaitAndSetTrue(), "_WaitAndSetTrue");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineFloatManager.IsCoroutineSuccess(handle))
+        while (!CoroutineFloatManager.IsCoroutineSuccess(handle) && CoroutineFloatManager.IsCoroutineExists(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
