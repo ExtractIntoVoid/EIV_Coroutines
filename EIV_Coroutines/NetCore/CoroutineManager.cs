@@ -7,12 +7,12 @@ namespace EIV_Coroutines;
 /// <summary>
 /// Manages coroutine with <see cref="ICoroutineWorker{T}"/>.
 /// </summary>
-/// <typeparam name="T"></typeparam>
-public partial class CoroutineManager<T> 
+/// <typeparam name="T">Any floating point type.</typeparam>
+public partial class CoroutineManager<T>
     where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
     /// <summary>
-    /// Current and static worker.
+    /// Gets the current and static worker.
     /// </summary>
     public static ICoroutineWorker<T>? StaticWorker { get; private set; }
 
@@ -22,7 +22,9 @@ public partial class CoroutineManager<T>
     public static void StartIfNotExists()
     {
         if (StaticWorker == null)
+        {
             Start();
+        }
     }
 
     /// <summary>
@@ -170,6 +172,13 @@ public partial class CoroutineManager<T>
         return StaticWorker!.IsCoroutineRunningInstance(coroutine);
     }
 
+        /// <inheritdoc cref="ICoroutineWorker{T}.IsCoroutinePausedInstance(CoroutineHandle)"/>
+    public static bool IsCoroutinePaused(CoroutineHandle coroutine)
+    {
+        StartIfNotExists();
+        return StaticWorker!.IsCoroutinePausedInstance(coroutine);
+    }
+
     /// <inheritdoc cref="ICoroutineWorker{T}.HasAnyCoroutinesInstance()"/>
     public static bool HasAnyCoroutines()
     {
@@ -178,6 +187,7 @@ public partial class CoroutineManager<T>
     }
 }
 
+#pragma warning disable SA1402 // File may only contain a single type
 /// <summary>
 /// The coroutine manager for <see cref="float"/>.
 /// </summary>
@@ -187,4 +197,5 @@ public class CoroutineFloatManager : CoroutineManager<float>;
 /// The coroutine manager for <see cref="double"/>.
 /// </summary>
 public class CoroutineDoubleManager : CoroutineManager<double>;
+#pragma warning restore SA1402 // File may only contain a single type
 #endif

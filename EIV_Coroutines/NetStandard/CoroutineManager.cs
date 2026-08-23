@@ -9,7 +9,7 @@ namespace EIV_Coroutines;
 public partial class CoroutineManager
 {
     /// <summary>
-    /// Current and static worker.
+    /// Gets the current and static worker.
     /// </summary>
     public static ICoroutineWorker? StaticWorker { get; private set; }
 
@@ -19,7 +19,9 @@ public partial class CoroutineManager
     public static void StartIfNotExists()
     {
         if (StaticWorker == null)
+        {
             Start();
+        }
     }
 
     /// <summary>
@@ -143,6 +145,13 @@ public partial class CoroutineManager
         return StaticWorker!.IsCoroutineRunningInstance(coroutine);
     }
 
+    /// <inheritdoc cref="ICoroutineWorker.IsCoroutinePausedInstance(CoroutineHandle)"/>
+    public static bool IsCoroutinePaused(CoroutineHandle coroutine)
+    {
+        StartIfNotExists();
+        return StaticWorker!.IsCoroutinePausedInstance(coroutine);
+    }
+
     /// <inheritdoc cref="ICoroutineWorker.HasAnyCoroutinesInstance()"/>
     public static bool HasAnyCoroutines()
     {
@@ -151,8 +160,10 @@ public partial class CoroutineManager
     }
 }
 
+#pragma warning disable SA1402 // File may only contain a single type
 /// <summary>
 /// The coroutine manager for <see cref="float"/>.
 /// </summary>
 public class CoroutineFloatManager : CoroutineManager;
+#pragma warning restore SA1402 // File may only contain a single type
 #endif

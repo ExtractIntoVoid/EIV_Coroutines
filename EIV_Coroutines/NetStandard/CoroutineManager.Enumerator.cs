@@ -1,11 +1,19 @@
 ﻿#if NETSTANDARD2_0
+using EIV_Coroutines.CoroutineWorkers;
+
 namespace EIV_Coroutines;
 
+/// <summary>
+/// Manages coroutine with <see cref="ICoroutineWorker"/>.
+/// </summary>
 public partial class CoroutineManager
 {
     /// <summary>
-    /// An empty coroutine.
+    /// Creates a new empty coroutine.
     /// </summary>
+    /// <returns>
+    /// An empty coroutine.
+    /// </returns>
     public static IEnumerator<float> Empty()
     {
         yield return 0f;
@@ -16,6 +24,9 @@ public partial class CoroutineManager
     /// </summary>
     /// <param name="timeSpan">The seconds to wait until <paramref name="action"/> run.</param>
     /// <param name="action">The action to run after <paramref name="timeSpan"/>.</param>
+    /// <returns>
+    /// A coroutine that waits <paramref name="timeSpan"/> seconds then call <paramref name="action"/>.
+    /// </returns>
     public static IEnumerator<float> DelayedCall(TimeSpan timeSpan, Action action)
     {
         yield return (float)timeSpan.TotalSeconds;
@@ -27,6 +38,9 @@ public partial class CoroutineManager
     /// </summary>
     /// <param name="timeSpan">The seconds to wait until <paramref name="action"/> run.</param>
     /// <param name="action">The action to run after <paramref name="timeSpan"/>.</param>
+    /// <returns>
+    /// A coroutine that waits <paramref name="timeSpan"/> seconds then call <paramref name="action"/>.
+    /// </returns>
     public static IEnumerator<float> CallContinuously(TimeSpan timeSpan, Action action)
     {
         while (true)
@@ -42,14 +56,21 @@ public partial class CoroutineManager
     /// <param name="evaluatorFunc">The function to check.</param>
     /// <param name="continueOn">The condition it should continue the paused process.</param>
     /// <param name="pausedProc">The paused process.</param>
+    /// <returns>
+    /// A coroutine that waits for <paramref name="evaluatorFunc"/> to be <paramref name="continueOn"/>.
+    /// </returns>
     public static IEnumerator<float> StartWhenDone(Func<bool>? evaluatorFunc, bool continueOn, IEnumerator<float> pausedProc)
     {
         if (evaluatorFunc == null)
+        {
             yield break;
+        }
+
         while (evaluatorFunc() == continueOn)
         {
             yield return float.NegativeInfinity;
         }
+
         StartIfNotExists();
         StaticWorker!.ReplacementObject = pausedProc;
         StaticWorker!.ReplacementFunction = ReturnTmpRefForRepFunc;
@@ -61,21 +82,26 @@ public partial class CoroutineManager
     /// </summary>
     /// <param name="coroutine">The coroutine to check.</param>
     /// <param name="pausedProc">The paused process.</param>
+    /// <returns>
+    /// A coroutine that waits for <paramref name="coroutine"/> to be success.
+    /// </returns>
     public static IEnumerator<float> StartWhenDone(CoroutineHandle? coroutine, IEnumerator<float> pausedProc)
     {
         if (!coroutine.HasValue)
+        {
             yield break;
+        }
 
         StartIfNotExists();
-        /*
+
         // Return to original if no coroutine found.
         if (!StaticWorker!.IsCoroutineExistsInstance(coroutine.Value))
         {
             StaticWorker!.ReplacementObject = pausedProc;
             StaticWorker!.ReplacementFunction = ReturnTmpRefForRepFunc;
-            yield return T.NaN;
+            yield return float.NaN;
         }
-        */
+
         while (!StaticWorker!.IsCoroutineSuccessInstance(coroutine.Value))
         {
             yield return float.NegativeInfinity;
@@ -90,19 +116,32 @@ public partial class CoroutineManager
     /// The replacement function to replace the current coroutine to <paramref name="coptr"/>.
     /// </summary>
     /// <param name="coptr">The coroutine to replace to.</param>
+    /// <returns>
+    /// The replacement coroutine or an empty coroutine.
+    /// </returns>
     public static IEnumerator<float> ReturnTmpRefForRepFunc(IEnumerator<float> coptr)
     {
         StartIfNotExists();
         if (StaticWorker!.ReplacementObject == null)
+        {
             return Empty();
+        }
+
         if (StaticWorker!.ReplacementObject is IEnumerator<float> that && that != null)
+        {
             return that;
+        }
+
         return Empty();
     }
 
     /// <summary>
     /// Helper method for <see cref="WaitUntilFalse(Func{bool})"/>.
     /// </summary>
+    /// <param name="coptr">The original coroutine.</param>
+    /// <returns>
+    /// The new <see cref="WaitUntilFalse(Func{bool})"/> coroutine.
+    /// </returns>
     public static IEnumerator<float> WaitUntilFalseHelper(IEnumerator<float> coptr)
     {
         StartIfNotExists();
@@ -112,6 +151,10 @@ public partial class CoroutineManager
     /// <summary>
     /// Helper method for <see cref="WaitUntilTrue(Func{bool})"/>.
     /// </summary>
+    /// <param name="coptr">The original coroutine.</param>
+    /// <returns>
+    /// The new <see cref="WaitUntilTrue(Func{bool})"/> coroutine.
+    /// </returns>
     public static IEnumerator<float> WaitUntilTrueHelper(IEnumerator<float> coptr)
     {
         StartIfNotExists();
@@ -121,6 +164,10 @@ public partial class CoroutineManager
     /// <summary>
     /// Helper method for <see cref="StartAfterCoroutine(CoroutineHandle)"/>.
     /// </summary>
+    /// <param name="coptr">The original coroutine.</param>
+    /// <returns>
+    /// The new <see cref="StartAfterCoroutine(CoroutineHandle)"/> coroutine.
+    /// </returns>
     public static IEnumerator<float> StartAfterCoroutineHelper(IEnumerator<float> coptr)
     {
         StartIfNotExists();

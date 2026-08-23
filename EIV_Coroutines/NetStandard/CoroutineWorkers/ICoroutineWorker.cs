@@ -7,12 +7,17 @@ namespace EIV_Coroutines.CoroutineWorkers;
 public interface ICoroutineWorker
 {
     /// <summary>
-    /// Replacement object for able to work in update.
+    /// Called when exception get caught with the handle.
+    /// </summary>
+    event Action<CoroutineHandle, Exception> OnException;
+
+    /// <summary>
+    /// Gets or sets replacement object for able to work in update.
     /// </summary>
     object? ReplacementObject { get; set; }
 
     /// <summary>
-    /// Function to replace if Delay is set to NaN / infinity.
+    /// Gets or sets the function to replace if Delay is set to NaN / infinity.
     /// </summary>
     Func<IEnumerator<float>, IEnumerator<float>>? ReplacementFunction { get; set; }
 
@@ -85,6 +90,13 @@ public interface ICoroutineWorker
     /// <param name="coroutine">The handle to check.</param>
     /// <returns><see langword="true"/> if exists, othewise. <see langword="false"/>.</returns>
     bool IsCoroutineExistsInstance(CoroutineHandle coroutine);
+
+    /// <summary>
+    /// Checks whenever the <paramref name="coroutine"/> is paused.
+    /// </summary>
+    /// <param name="coroutine">The handle to check.</param>
+    /// <returns><see langword="true"/> if paused, othewise. <see langword="false"/>.</returns>
+    bool IsCoroutinePausedInstance(CoroutineHandle coroutine);
 
     /// <summary>
     /// Checks whenever the <paramref name="coroutine"/> is successly finished.

@@ -5,11 +5,24 @@ using System.Diagnostics;
 namespace EIV_Coroutines.CoroutineWorkers;
 
 /// <summary>
-/// Custom worker.
+/// A custom worker.
 /// </summary>
 public class CoroutineWorkerCustom : ICoroutineWorker
 {
-    private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> SafeCoroutines = [];
+    /// <summary>
+    /// Gets or sets the current update rate.
+    /// </summary>
+    public static float UpdateRate { get; set; } = 1;
+
+    private Thread? updateThread;
+    private readonly Stopwatch watch = new();
+    private float prevTime = 0;
+    private float accumulator = 0;
+    private SynchronizationContext? mainContext;
+    private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> safeCoroutines = [];
+
+    /// <inheritdoc />
+    public event Action<CoroutineHandle, Exception>? OnException;
 
     /// <inheritdoc />
     public object? ReplacementObject { get; set; }
@@ -23,55 +36,36 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     /// <inheritdoc />
     public bool KillOnSuccess { get; set; } = true;
 
-    /// <summary>
-    /// Gets or sets the current update rate.
-    /// </summary>
-    public static float UpdateRate { get; set; } = 1f;
-
     /// <inheritdoc />
     public IEnumerable<Coroutine> Coroutines
     {
         get
         {
-            return SafeCoroutines.Values;
+            return safeCoroutines.Values;
         }
     }
-
-    #region Private fields
-    private Thread? UpdateThread;
-    private readonly Stopwatch Watch = new();
-    private float prevTime = 0f;
-    private float accumulator = 0f;
-    #endregion
-
-    #region Basic stuff (Init, Quit, Update)
-    SynchronizationContext? mainContext;
 
     /// <inheritdoc />
     public void Init()
     {
-        Watch.Start();
-        prevTime = Watch.ElapsedMilliseconds / 1000;
-        UpdateThread = new(ThreadUpdate)
+        safeCoroutines.Clear();
+        watch.Start();
+        prevTime = watch.ElapsedMilliseconds / 1000;
+        updateThread = new(ThreadUpdate)
         {
-            IsBackground = true
+            IsBackground = true,
         };
-        UpdateThread.Start();
+        updateThread.Start();
         mainContext = SynchronizationContext.Current;
     }
 
     /// <inheritdoc />
     public void Quit()
     {
-        Kill();
-        UpdateThread?.Interrupt();
-        UpdateThread = null;
-        Watch.Stop();
-    }
-
-    private void UpdateObj(object? obj)
-    {
-        UpdateDT((float)obj!);
+        safeCoroutines.Clear();
+        updateThread?.Interrupt();
+        updateThread = null;
+        watch.Stop();
     }
 
     /// <inheritdoc />
@@ -79,7 +73,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     {
         Kill();
 
-        foreach (var coroutine in SafeCoroutines.ToList())
+        foreach (var coroutine in safeCoroutines.ToList())
         {
             UpdateLogic(coroutine.Key, coroutine.Value, deltaTime);
         }
@@ -87,14 +81,131 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         Kill();
     }
 
+    /// <inheritdoc />
+    public void KillCoroutineInstance(CoroutineHandle coroutine)
+    {
+        var cor = GetCoroutine(coroutine);
+        if (cor is null)
+        {
+            return;
+        }
+
+        cor.ShouldKill = true;
+        safeCoroutines[coroutine] = cor;
+    }
+
+    /// <inheritdoc />
+    public void KillCoroutinesInstance(IList<CoroutineHandle> coroutines)
+    {
+        foreach (CoroutineHandle coroutine in coroutines)
+        {
+            KillCoroutineInstance(coroutine);
+        }
+    }
+
+    /// <inheritdoc />
+    public void KillCoroutineTagInstance(string tag)
+    {
+        var cors = safeCoroutines.Where(x => x.Value.Tag == tag).Select(x => x.Key).ToList();
+        KillCoroutinesInstance(cors);
+    }
+
+    /// <inheritdoc />
+    public bool HasAnyCoroutinesInstance()
+    {
+        return !safeCoroutines.IsEmpty;
+    }
+
+    /// <inheritdoc />
+    public bool IsCoroutineExistsInstance(CoroutineHandle coroutine)
+    {
+        return safeCoroutines.ContainsKey(coroutine);
+    }
+
+    /// <inheritdoc />
+    public bool IsCoroutineSuccessInstance(CoroutineHandle coroutine)
+    {
+        var cor = GetCoroutine(coroutine);
+        if (cor is null)
+        {
+            return false;
+        }
+
+        return cor.IsSuccess;
+    }
+
+    /// <inheritdoc />
+    public bool IsCoroutinePausedInstance(CoroutineHandle coroutine)
+    {
+        var cor = GetCoroutine(coroutine);
+        if (cor is null)
+        {
+            return false;
+        }
+
+        return cor.IsPaused;
+    }
+
+    /// <inheritdoc />
+    public bool IsCoroutineRunningInstance(CoroutineHandle coroutine)
+    {
+        var cor = GetCoroutine(coroutine);
+        if (cor is null)
+        {
+            return false;
+        }
+
+        return cor.IsRunning;
+    }
+
+    /// <inheritdoc />
+    public void PauseCoroutineInstance(CoroutineHandle coroutine)
+    {
+        var cor = GetCoroutine(coroutine);
+        if (cor is null)
+        {
+            return;
+        }
+
+        cor.IsPaused = !cor.IsPaused;
+        safeCoroutines[coroutine] = cor;
+    }
+
+    /// <inheritdoc />
+    public CoroutineHandle AddCoroutineInstance(Coroutine coroutine)
+    {
+        coroutine.Delay = 0;
+        CoroutineHandle handle = CoroutineHandle.AsHandle(coroutine);
+        safeCoroutines.TryAdd(handle, coroutine);
+        return handle;
+    }
+
+    /// <inheritdoc />
+    public Coroutine? GetCoroutine(CoroutineHandle handle)
+    {
+        if (safeCoroutines.TryGetValue(handle, out var coroutine))
+        {
+            return coroutine;
+        }
+
+        return null;
+    }
+
+    private void UpdateObj(object? obj)
+    {
+        UpdateDT((float)obj!);
+    }
+
     private void UpdateLogic(CoroutineHandle handle, Coroutine coroutine, float deltaTime)
     {
         // IF the delay for it is not zero, we remove from current delta.
-        if (coroutine.Delay > 0f)
+        if (coroutine.Delay > 0)
+        {
             coroutine.Delay -= deltaTime;
+        }
 
         // IF the delay is zero OR smaller (means we got negative time) we work on it.
-        if (coroutine.Delay <= 0f)
+        if (coroutine.Delay <= 0 || coroutine.Delay == float.NegativeInfinity)
         {
             Work(handle, coroutine);
         }
@@ -110,135 +221,68 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
     private void Work(CoroutineHandle handle, Coroutine coroutine)
     {
-        if (coroutine is { IsPaused: true } or { IsSuccess: true } or { ShouldKill: true })
+        // We should not touch paused and to be killed ones.
+        if (coroutine is { IsPaused: true } or { ShouldKill: true })
+        {
             return;
+        }
+
+        // mark to be killed when success.
+        if (KillOnSuccess && coroutine is { IsSuccess: true })
+        {
+            coroutine.ShouldKill = true;
+            safeCoroutines[handle] = coroutine;
+            return;
+        }
 
         coroutine.IsRunning = true;
 
-        if (coroutine.Enumerator.MoveNext())
+        try
         {
-            coroutine.Delay = coroutine.Enumerator.Current;
+            if (!coroutine.Enumerator.MoveNext())
+            {
+                coroutine.IsRunning = false;
+                coroutine.IsSuccess = true;
+            }
+            else
+            {
+                coroutine.Delay = coroutine.Enumerator.Current;
+            }
+
+            safeCoroutines[handle] = coroutine;
         }
-        else
+        catch (Exception ex)
         {
-            coroutine.IsRunning = false;
-            coroutine.IsSuccess = true;
-
-            if (KillOnSuccess)
-                coroutine.ShouldKill = true;
-        }
-
-        SafeCoroutines[handle] = coroutine;
-    }
-
-    #endregion
-    #region Kills
-    /// <inheritdoc />
-    public void KillCoroutineInstance(CoroutineHandle coroutine)
-    {
-        var cor = GetCoroutine(coroutine);
-        if (cor is null)
-            return;
-        cor.ShouldKill = true;
-        SafeCoroutines[coroutine] = cor;
-    }
-
-    /// <inheritdoc />
-    public void KillCoroutinesInstance(IList<CoroutineHandle> coroutines)
-    {
-        foreach (CoroutineHandle coroutine in coroutines)
-        {
-            KillCoroutineInstance(coroutine);
+            OnException?.Invoke(handle, ex);
         }
     }
 
-    /// <inheritdoc />
-    public void KillCoroutineTagInstance(string tag)
-    {
-        var cors = SafeCoroutines.Where(x => x.Value.Tag == tag).Select(x => x.Key).ToList();
-        KillCoroutinesInstance(cors);
-    }
-    #endregion
-    #region Checks
-    /// <inheritdoc />
-    public bool HasAnyCoroutinesInstance()
-    {
-        return !SafeCoroutines.IsEmpty;
-    }
-
-    /// <inheritdoc />
-    public bool IsCoroutineExistsInstance(CoroutineHandle coroutine)
-    {
-        return SafeCoroutines.ContainsKey(coroutine);
-    }
-
-    /// <inheritdoc />
-    public bool IsCoroutineSuccessInstance(CoroutineHandle coroutine)
-    {
-        var cor = GetCoroutine(coroutine);
-        if (cor is null)
-            return false;
-        return cor.IsSuccess;
-    }
-
-    /// <inheritdoc />
-    public bool IsCoroutineRunningInstance(CoroutineHandle coroutine)
-    {
-        var cor = GetCoroutine(coroutine);
-        if (cor is null)
-            return false;
-        return cor.IsRunning;
-    }
-    #endregion
-    #region Other Coroutine stuff
-    /// <inheritdoc />
-    public void PauseCoroutineInstance(CoroutineHandle coroutine)
-    {
-        var cor = GetCoroutine(coroutine);
-        if (cor is null)
-            return;
-        cor.IsPaused = !cor.IsPaused;
-        SafeCoroutines[coroutine] = cor;
-    }
-
-    /// <inheritdoc />
-    public CoroutineHandle AddCoroutineInstance(Coroutine coroutine)
-    {
-        coroutine.Delay = 0f;
-        CoroutineHandle handle = CoroutineHandle.AsHandle(coroutine);
-        SafeCoroutines.TryAdd(handle, coroutine);
-        return handle;
-    }
-
-    /// <inheritdoc />
-    public Coroutine? GetCoroutine(CoroutineHandle handle)
-    {
-        if (SafeCoroutines.TryGetValue(handle, out var coroutine))
-            return coroutine;
-        return null;
-    }
-
-    #endregion
-    #region Private stuff
     private void Kill()
     {
-        foreach (var coroutine in SafeCoroutines.ToList())
+        foreach (var coroutine in safeCoroutines.ToList())
         {
             if (coroutine.Value.ShouldKill)
-                SafeCoroutines.TryRemove(coroutine.Key, out _);
+            {
+                safeCoroutines.TryRemove(coroutine.Key, out _);
+            }
         }
     }
 
     private void ThreadUpdate()
     {
-        if (UpdateThread == null)
+        if (updateThread == null)
+        {
             return;
+        }
 
-        while (UpdateThread != null && UpdateThread.ThreadState == System.Threading.ThreadState.Background)
+        while (updateThread != null && updateThread.ThreadState == System.Threading.ThreadState.Background)
         {
             if (PauseUpdate)
+            {
                 continue;
-            float currTime = (float)(Watch.ElapsedMilliseconds / 1000d);
+            }
+
+            float currTime = (float)(watch.ElapsedMilliseconds / 1000d);
             accumulator += currTime - prevTime;
             prevTime = currTime;
 
@@ -246,12 +290,15 @@ public class CoroutineWorkerCustom : ICoroutineWorker
             {
                 accumulator -= UpdateRate;
                 if (mainContext != null)
+                {
                     mainContext.Send(UpdateObj, UpdateRate);
+                }
                 else
+                {
                     UpdateDT(UpdateRate);
+                }
             }
         }
     }
-    #endregion
 }
 #endif
