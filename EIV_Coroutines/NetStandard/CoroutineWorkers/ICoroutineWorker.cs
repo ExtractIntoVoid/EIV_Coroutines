@@ -9,7 +9,7 @@ public interface ICoroutineWorker
     /// <summary>
     /// Called when exception get caught with the handle.
     /// </summary>
-    event Action<CoroutineHandle, Exception> OnException;
+    event EventHandler<CoroutineExceptionEventArgs> OnException;
 
     /// <summary>
     /// Gets or sets replacement object for able to work in update.

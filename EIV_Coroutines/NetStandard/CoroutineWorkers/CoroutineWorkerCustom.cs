@@ -12,17 +12,17 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     /// <summary>
     /// Gets or sets the current update rate.
     /// </summary>
-    public static float UpdateRate { get; set; } = 1;
+    public static float UpdateRate { get; set; } = 1 / 60;
 
     private Thread? updateThread;
     private readonly Stopwatch watch = new();
-    private float prevTime = 0;
-    private float accumulator = 0;
+    private float prevTime;
+    private float accumulator;
     private SynchronizationContext? mainContext;
     private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> safeCoroutines = [];
 
     /// <inheritdoc />
-    public event Action<CoroutineHandle, Exception>? OnException;
+    public event EventHandler<CoroutineExceptionEventArgs>? OnException;
 
     /// <inheritdoc />
     public object? ReplacementObject { get; set; }
@@ -31,7 +31,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     public Func<IEnumerator<float>, IEnumerator<float>>? ReplacementFunction { get; set; }
 
     /// <inheritdoc />
-    public bool PauseUpdate { get; set; } = false;
+    public bool PauseUpdate { get; set; }
 
     /// <inheritdoc />
     public bool KillOnSuccess { get; set; } = true;
@@ -97,6 +97,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     /// <inheritdoc />
     public void KillCoroutinesInstance(IList<CoroutineHandle> coroutines)
     {
+        if (coroutines == null)
+        {
+            return;
+        }
+
         foreach (CoroutineHandle coroutine in coroutines)
         {
             KillCoroutineInstance(coroutine);
@@ -174,6 +179,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     /// <inheritdoc />
     public CoroutineHandle AddCoroutineInstance(Coroutine coroutine)
     {
+        if (coroutine == null)
+        {
+            throw new ArgumentNullException(nameof(coroutine));
+        }
+
         coroutine.Delay = 0;
         CoroutineHandle handle = CoroutineHandle.AsHandle(coroutine);
         safeCoroutines.TryAdd(handle, coroutine);
@@ -181,11 +191,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     }
 
     /// <inheritdoc />
-    public Coroutine? GetCoroutine(CoroutineHandle handle)
+    public Coroutine? GetCoroutine(CoroutineHandle coroutine)
     {
-        if (safeCoroutines.TryGetValue(handle, out var coroutine))
+        if (safeCoroutines.TryGetValue(coroutine, out var value))
         {
-            return coroutine;
+            return value;
         }
 
         return null;
@@ -237,6 +247,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
         coroutine.IsRunning = true;
 
+#pragma warning disable CA1031 // Do not catch general exception types
         try
         {
             if (!coroutine.Enumerator.MoveNext())
@@ -253,8 +264,9 @@ public class CoroutineWorkerCustom : ICoroutineWorker
         }
         catch (Exception ex)
         {
-            OnException?.Invoke(handle, ex);
+            OnException?.Invoke(this, new(handle, ex));
         }
+#pragma warning restore CA1031 // Do not catch general exception types
     }
 
     private void Kill()

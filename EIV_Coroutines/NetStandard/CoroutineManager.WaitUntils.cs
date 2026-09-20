@@ -6,7 +6,7 @@ namespace EIV_Coroutines;
 /// <summary>
 /// Manages coroutine with <see cref="ICoroutineWorker"/>.
 /// </summary>
-public partial class CoroutineManager
+public static partial class CoroutineFloatManager
 {
     /// <summary>
     /// Waits until <paramref name="evaluatorFunc"/> returns <see langword="false"/>.

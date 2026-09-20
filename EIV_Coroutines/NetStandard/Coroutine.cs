@@ -50,7 +50,7 @@ public class Coroutine :
     /// <summary>
     /// Gets or sets the current delay the coroutine should wait until running again.
     /// </summary>
-    public float Delay { get; set; } = 0;
+    public float Delay { get; set; }
 
     /// <summary>
     /// Gets the tag for distinge between other coroutines.
@@ -104,6 +104,11 @@ public class Coroutine :
     /// <inheritdoc/>
     public int GetHashCode(Coroutine obj)
     {
+        if (obj == null)
+        {
+            return 0;
+        }
+
         return obj.GetHashCode();
     }
 

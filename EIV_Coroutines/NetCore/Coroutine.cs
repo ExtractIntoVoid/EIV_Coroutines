@@ -96,7 +96,7 @@ public class Coroutine<T> :
     public override int GetHashCode()
     {
         return BaseEnumerator != null ?
-            BaseEnumerator.GetHashCode() + Tag.GetHashCode() + increment :
+            BaseEnumerator.GetHashCode() + Tag.GetHashCode(StringComparison.InvariantCulture) + increment :
             0;
     }
 
@@ -109,6 +109,11 @@ public class Coroutine<T> :
     /// <inheritdoc/>
     public int GetHashCode([DisallowNull] Coroutine<T> obj)
     {
+        if (obj == null)
+        {
+            return 0;
+        }
+
         return obj.GetHashCode();
     }
 

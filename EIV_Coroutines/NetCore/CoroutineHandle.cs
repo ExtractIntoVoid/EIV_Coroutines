@@ -48,6 +48,11 @@ public readonly struct CoroutineHandle(int hash) :
     public static CoroutineHandle AsHandle<T>(Coroutine<T> coroutine)
         where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
     {
+        if (coroutine == null)
+        {
+            return new(0);
+        }
+
         return new CoroutineHandle(coroutine.GetHashCode());
     }
 

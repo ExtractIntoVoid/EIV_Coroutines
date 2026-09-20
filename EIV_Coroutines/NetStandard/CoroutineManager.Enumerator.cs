@@ -6,7 +6,7 @@ namespace EIV_Coroutines;
 /// <summary>
 /// Manages coroutine with <see cref="ICoroutineWorker"/>.
 /// </summary>
-public partial class CoroutineManager
+public static partial class CoroutineFloatManager
 {
     /// <summary>
     /// Creates a new empty coroutine.
@@ -30,7 +30,7 @@ public partial class CoroutineManager
     public static IEnumerator<float> DelayedCall(TimeSpan timeSpan, Action action)
     {
         yield return (float)timeSpan.TotalSeconds;
-        action();
+        action?.Invoke();
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public partial class CoroutineManager
         while (true)
         {
             yield return (float)timeSpan.TotalSeconds;
-            action();
+            action?.Invoke();
         }
     }
 
@@ -127,7 +127,7 @@ public partial class CoroutineManager
             return Empty();
         }
 
-        if (StaticWorker!.ReplacementObject is IEnumerator<float> that && that != null)
+        if (StaticWorker!.ReplacementObject is IEnumerator<float> that)
         {
             return that;
         }

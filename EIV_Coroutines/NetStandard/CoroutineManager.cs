@@ -6,7 +6,7 @@ namespace EIV_Coroutines;
 /// <summary>
 /// Manages coroutine with <see cref="ICoroutineWorker"/>.
 /// </summary>
-public partial class CoroutineManager
+public static partial class CoroutineFloatManager
 {
     /// <summary>
     /// Gets the current and static worker.
@@ -59,6 +59,18 @@ public partial class CoroutineManager
         StartIfNotExists();
         Coroutine coroutine = new(objects, tag);
         return StaticWorker!.AddCoroutineInstance(coroutine);
+    }
+
+    /// <summary>
+    /// Calls the action with a delayed <paramref name="secondsDelay"/>.
+    /// </summary>
+    /// <param name="secondsDelay">The delay time as secondsDelay.</param>
+    /// <param name="action">The action to call.</param>
+    /// <param name="tag">The tag associated with the coroutine.</param>
+    /// <returns>The handle of the new coroutine.</returns>
+    public static CoroutineHandle CallDelayed(float secondsDelay, Action action, string tag = "")
+    {
+        return StartCoroutine(DelayedCall(TimeSpan.FromSeconds(secondsDelay), action), tag);
     }
 
     /// <summary>
@@ -160,10 +172,4 @@ public partial class CoroutineManager
     }
 }
 
-#pragma warning disable SA1402 // File may only contain a single type
-/// <summary>
-/// The coroutine manager for <see cref="float"/>.
-/// </summary>
-public class CoroutineFloatManager : CoroutineManager;
-#pragma warning restore SA1402 // File may only contain a single type
 #endif

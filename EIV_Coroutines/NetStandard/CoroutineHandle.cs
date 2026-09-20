@@ -38,6 +38,11 @@ public readonly struct CoroutineHandle(int hash) :
     /// <returns>A new handle.</returns>
     public static CoroutineHandle AsHandle(Coroutine coroutine)
     {
+        if (coroutine == null)
+        {
+            return new(0);
+        }
+
         return new CoroutineHandle(coroutine.GetHashCode());
     }
 

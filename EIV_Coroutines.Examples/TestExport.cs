@@ -11,21 +11,21 @@ internal class TestExport
     [UnmanagedCallersOnly(EntryPoint = "Setup", CallConvs = [typeof(CallConvCdecl)])]
     public static void Setup()
     {
-        CoroutineWorkerCustom<double>.UpdateRate = 1 / 144f;
-        CoroutineDoubleManager.Start();
+        CoroutineManager.Start<double>();
+        (CoroutineManager.GetWorker<double>() as CoroutineWorkerCustom<double>)?.UpdateRate = 1 / 144f;
     }
 
     [UnmanagedCallersOnly(EntryPoint = "Teardown", CallConvs = [typeof(CallConvCdecl)])]
     public static void Teardown()
     {
-        CoroutineDoubleManager.Stop();
+        CoroutineManager.Stop<double>();
     }
 
 
     [UnmanagedCallersOnly(EntryPoint = "Test", CallConvs = [typeof(CallConvCdecl)])]
     public static void Test()
     {
-        CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
+        CoroutineManager.StartCoroutine(CountingDown(), "Test");
     }
 
     public static IEnumerator<double> CountingDown()
@@ -33,7 +33,7 @@ internal class TestExport
         yield return 0;
         byte i = byte.MaxValue;
         Console.WriteLine("_CountingDown set i to byte max");
-        yield return CoroutineDoubleManager.WaitUntilZero<byte>(
+        yield return CoroutineManager.WaitUntilZero<double, byte>(
             () =>
             {
                 i--;

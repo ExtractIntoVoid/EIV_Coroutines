@@ -10,92 +10,92 @@ public class CoroutineTest_Double
     public void SetUp()
     {
         // This exist here to make our test faster, running at 144 fps
-        CoroutineWorkerCustom<double>.UpdateRate = 1 / 60f;
-        CoroutineDoubleManager.Start();
+        CoroutineManager.Start<double>();
+        (CoroutineManager.GetWorker<double>() as CoroutineWorkerCustom<double>)?.UpdateRate = 1 / 60f;
 
     }
 
     [TearDown]
     public void Teardown()
     {
-        CoroutineDoubleManager.Stop();
+        CoroutineManager.Stop<double>();
     }
 
     [Test]
     public void TestAllFuncs()
     {
         // simple inits
-        if (CoroutineDoubleManager.StaticWorker == null)
+        if (CoroutineManager.GetWorker<double>() == null)
         {
-            CoroutineDoubleManager.Start();
+            CoroutineManager.Stop<double>();
         }
 
-        CoroutineDoubleManager.StaticWorker!.Init();
-        CoroutineDoubleManager.StaticWorker!.Quit();
-        CoroutineDoubleManager.StaticWorker!.Init();
+        CoroutineManager.GetWorker<double>()!.Init();
+        CoroutineManager.GetWorker<double>()!.Quit();
+        CoroutineManager.GetWorker<double>()!.Init();
 
         // run fast
-        CoroutineDoubleManager.StaticWorker!.UpdateDT(1);
+        CoroutineManager.GetWorker<double>()!.UpdateDT(1);
 
-        Assert.IsEmpty(CoroutineDoubleManager.StaticWorker!.Coroutines);
+        Assert.IsEmpty(CoroutineManager.GetWorker<double>()!.Coroutines);
 
-        Assert.False(CoroutineDoubleManager.StaticWorker!.HasAnyCoroutinesInstance());
+        Assert.False(CoroutineManager.GetWorker<double>()!.HasAnyCoroutinesInstance());
 
         Coroutine<double> coroutine = new(CountingDown(), "Test2");
 
-        var CountingDownHash = CoroutineDoubleManager.StaticWorker!.AddCoroutineInstance(coroutine);
+        var CountingDownHash = CoroutineManager.GetWorker<double>()!.AddCoroutineInstance(coroutine);
 
-        var cor = CoroutineDoubleManager.StaticWorker!.GetCoroutine(CountingDownHash);
+        var cor = CoroutineManager.GetWorker<double>()!.GetCoroutine(CountingDownHash);
         Assert.NotNull(cor);
         Assert.AreEqual(coroutine, cor);
 
-        CoroutineDoubleManager.StaticWorker!.UpdateDT(0);
+        CoroutineManager.GetWorker<double>()!.UpdateDT(0);
 
-        Assert.True(CoroutineDoubleManager.StaticWorker!.HasAnyCoroutinesInstance());
+        Assert.True(CoroutineManager.GetWorker<double>()!.HasAnyCoroutinesInstance());
 
-        cor = CoroutineDoubleManager.StaticWorker!.GetCoroutine(CountingDownHash);
+        cor = CoroutineManager.GetWorker<double>()!.GetCoroutine(CountingDownHash);
 
         Console.WriteLine(cor);
 
-        Assert.True(CoroutineDoubleManager.StaticWorker!.IsCoroutineExistsInstance(CountingDownHash));
-        Assert.True(CoroutineDoubleManager.StaticWorker!.IsCoroutineRunningInstance(CountingDownHash));
-        Assert.False(CoroutineDoubleManager.StaticWorker!.IsCoroutineSuccessInstance(CountingDownHash));
+        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineExistsInstance(CountingDownHash));
+        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineRunningInstance(CountingDownHash));
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineSuccessInstance(CountingDownHash));
 
-        CoroutineDoubleManager.StaticWorker!.PauseCoroutineInstance(CountingDownHash);
-        Assert.True(CoroutineDoubleManager.StaticWorker!.IsCoroutinePausedInstance(CountingDownHash));
-        CoroutineDoubleManager.StaticWorker!.PauseCoroutineInstance(CountingDownHash);
+        CoroutineManager.GetWorker<double>()!.PauseCoroutineInstance(CountingDownHash);
+        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutinePausedInstance(CountingDownHash));
+        CoroutineManager.GetWorker<double>()!.PauseCoroutineInstance(CountingDownHash);
 
-        CoroutineDoubleManager.StaticWorker!.KillCoroutineInstance(coroutine);
-        CoroutineDoubleManager.StaticWorker!.KillCoroutineInstance(coroutine);
-        CoroutineDoubleManager.StaticWorker!.KillCoroutinesInstance([coroutine]);
-        CoroutineDoubleManager.StaticWorker!.KillCoroutineTagInstance("Test2");
+        CoroutineManager.GetWorker<double>()!.KillCoroutineInstance(coroutine);
+        CoroutineManager.GetWorker<double>()!.KillCoroutineInstance(coroutine);
+        CoroutineManager.GetWorker<double>()!.KillCoroutinesInstance([coroutine]);
+        CoroutineManager.GetWorker<double>()!.KillCoroutineTagInstance("Test2");
 
-        CoroutineDoubleManager.StaticWorker!.UpdateDT(1);
+        CoroutineManager.GetWorker<double>()!.UpdateDT(1);
 
-        Assert.False(CoroutineDoubleManager.StaticWorker!.IsCoroutineExistsInstance(CountingDownHash));
-        Assert.False(CoroutineDoubleManager.StaticWorker!.IsCoroutineRunningInstance(CountingDownHash));
-        Assert.False(CoroutineDoubleManager.StaticWorker!.IsCoroutineSuccessInstance(CountingDownHash));
-        Assert.False(CoroutineDoubleManager.StaticWorker!.IsCoroutinePausedInstance(CountingDownHash));
-        CoroutineDoubleManager.StaticWorker!.PauseCoroutineInstance(CountingDownHash);
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineExistsInstance(CountingDownHash));
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineRunningInstance(CountingDownHash));
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineSuccessInstance(CountingDownHash));
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutinePausedInstance(CountingDownHash));
+        CoroutineManager.GetWorker<double>()!.PauseCoroutineInstance(CountingDownHash);
 
-        cor = CoroutineDoubleManager.StaticWorker!.GetCoroutine(CountingDownHash);
+        cor = CoroutineManager.GetWorker<double>()!.GetCoroutine(CountingDownHash);
         Assert.IsNull(cor);
     }
 
     [Test]
     public void TestWaitCountdown()
     {
-        var handle = CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
+        var handle = CoroutineManager.StartCoroutine(CountingDown(), "Test");
         Thread.Sleep(5);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(handle, Is.Not.Zero);
             Assert.That(handle.CoroutineHash, Is.Not.Zero);
-            Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
-            Assert.That(CoroutineDoubleManager.IsCoroutineRunning(handle), Is.True);
+            Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.True);
+            Assert.That(CoroutineManager.IsCoroutineRunning<double>(handle), Is.True);
         }
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle) && CoroutineDoubleManager.IsCoroutineExists(handle))
+        while (!CoroutineManager.IsCoroutineSuccess<double>(handle) && CoroutineManager.IsCoroutineExists<double>(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
@@ -105,7 +105,7 @@ public class CoroutineTest_Double
         }
         stopwatch.Stop();
         Thread.Sleep(10);
-        CoroutineFloatManager.KillCoroutines([handle]);
+        CoroutineManager.KillCoroutines<double>([handle]);
     }
 
 
@@ -113,14 +113,14 @@ public class CoroutineTest_Double
     public void TestWaitFor()
     {
         _TestBoolValue = false;
-        var handle = CoroutineDoubleManager.StartCoroutine(WaitForTrue(), "_WaitForTrue");
+        var handle = CoroutineManager.StartCoroutine(WaitForTrue(), "_WaitForTrue");
         Assert.That(handle, Is.Not.Zero);
         Assert.That(handle.CoroutineHash, Is.Not.Zero);
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
-        var WaitAndSetTrue_handle = CoroutineDoubleManager.StartCoroutine(WaitAndSetTrue(), "_WaitAndSetTrue");
+        Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.True);
+        var WaitAndSetTrue_handle = CoroutineManager.StartCoroutine(WaitAndSetTrue(), "_WaitAndSetTrue");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (!CoroutineDoubleManager.IsCoroutineSuccess(handle) && CoroutineDoubleManager.IsCoroutineExists(handle))
+        while (!CoroutineManager.IsCoroutineSuccess<double>(handle) && CoroutineManager.IsCoroutineExists<double>(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
             {
@@ -133,70 +133,70 @@ public class CoroutineTest_Double
         using (Assert.EnterMultipleScope())
         {
             Assert.That(_TestBoolValue, Is.True);
-            Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.False);
-            Assert.That(CoroutineDoubleManager.IsCoroutineSuccess(handle), Is.False);
+            Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.False);
+            Assert.That(CoroutineManager.IsCoroutineSuccess<double>(handle), Is.False);
         }
-        CoroutineDoubleManager.KillCoroutines([handle, WaitAndSetTrue_handle]);
+        CoroutineManager.KillCoroutines<double>([handle, WaitAndSetTrue_handle]);
         _TestBoolValue = false;
     }
 
     [Test]
     public void TestKillTag()
     {
-        var handle = CoroutineDoubleManager.StartCoroutine(FakeCountingDown(), "Test");
+        var handle = CoroutineManager.StartCoroutine(FakeCountingDown(), "Test");
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
+        Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.True);
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineSuccess(handle), Is.False);
-        CoroutineDoubleManager.KillCoroutineTag("Test");
+        Assert.That(CoroutineManager.IsCoroutineSuccess<double>(handle), Is.False);
+        CoroutineManager.KillCoroutineTag<double>("Test");
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (CoroutineDoubleManager.IsCoroutineExists(handle))
+        while (CoroutineManager.IsCoroutineExists<double>(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
                 Assert.Fail();
             // wait until test over.
         }
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.False);
+        Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.False);
     }
 
     [Test]
     public void TestKill()
     {
-        var handle = CoroutineDoubleManager.StartCoroutine(FakeCountingDown(), "Test_KILL");
+        var handle = CoroutineManager.StartCoroutine(FakeCountingDown(), "Test_KILL");
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.True);
+        Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.True);
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineSuccess(handle), Is.False);
-        CoroutineDoubleManager.KillCoroutine(handle);
+        Assert.That(CoroutineManager.IsCoroutineSuccess<double>(handle), Is.False);
+        CoroutineManager.KillCoroutine<double>(handle);
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (CoroutineDoubleManager.IsCoroutineExists(handle))
+        while (CoroutineManager.IsCoroutineExists<double>(handle))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(15))
                 Assert.Fail();
             // wait until test over.
         }
         Thread.Sleep(10);
-        Assert.That(CoroutineDoubleManager.IsCoroutineExists(handle), Is.False);
+        Assert.That(CoroutineManager.IsCoroutineExists<double>(handle), Is.False);
     }
 
     [Test]
     public void TestNoCor()
     {
-        Assert.That(CoroutineDoubleManager.HasAnyCoroutines(), Is.False);
-        var handle = CoroutineDoubleManager.StartCoroutine(FakeCountingDown(), "Test");
-        CoroutineDoubleManager.KillCoroutine(handle);
+        Assert.That(CoroutineManager.HasAnyCoroutines<double>(), Is.False);
+        var handle = CoroutineManager.StartCoroutine(FakeCountingDown(), "Test");
+        CoroutineManager.KillCoroutine<double>(handle);
     }
 
 
     [Test]
     public void TestOtherCor()
     {
-        var countDown = CoroutineDoubleManager.StartCoroutine(CountingDown(), "Test");
-        var waitOther = CoroutineDoubleManager.StartCoroutine(WaitUntilOtherCor2(countDown), "Test");
+        var countDown = CoroutineManager.StartCoroutine(CountingDown(), "Test");
+        var waitOther = CoroutineManager.StartCoroutine(WaitUntilOtherCor2(countDown), "Test");
         Thread.Sleep(5);
-        CoroutineDoubleManager.KillCoroutine(countDown);
+        CoroutineManager.KillCoroutine<double>(countDown);
         Stopwatch stopwatch = Stopwatch.StartNew();
-        while (CoroutineDoubleManager.IsCoroutineRunning(waitOther))
+        while (CoroutineManager.IsCoroutineRunning<double>(waitOther))
         {
             if (stopwatch.Elapsed > TimeSpan.FromSeconds(10))
             {
@@ -208,9 +208,9 @@ public class CoroutineTest_Double
         Thread.Sleep(100);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(CoroutineDoubleManager.IsCoroutineExists(waitOther), Is.False);
+            Assert.That(CoroutineManager.IsCoroutineExists<double>(waitOther), Is.False);
         }
-        CoroutineDoubleManager.KillCoroutines([waitOther, countDown]);
+        CoroutineManager.KillCoroutines<double>([waitOther, countDown]);
     }
 
 
@@ -219,7 +219,7 @@ public class CoroutineTest_Double
         yield return 0;
         byte i = byte.MaxValue;
         //Log.Information("_CountingDown set i to byte max");
-        yield return CoroutineDoubleManager.WaitUntilZero<byte>(
+        yield return CoroutineManager.WaitUntilZero<double, byte>(
             () =>
             {
                 i--;
@@ -232,7 +232,7 @@ public class CoroutineTest_Double
     }
     private static IEnumerator<double> FakeCountingDown()
     {
-        yield return CoroutineDoubleManager.WaitUntilZero<byte>(
+        yield return CoroutineManager.WaitUntilZero<double, byte>(
             () =>
             {
                 return 1;
@@ -246,7 +246,7 @@ public class CoroutineTest_Double
     private IEnumerator<double> WaitForTrue()
     {
         //Log.Information("_WaitForTrue! ");
-        yield return CoroutineDoubleManager.WaitUntilTrue(() => _TestBoolValue);
+        yield return CoroutineManager.WaitUntilTrue<double>(() => _TestBoolValue);
         //Log.Information("true! " + _TestBoolValue);
         yield return 0;
         yield break;
@@ -262,7 +262,7 @@ public class CoroutineTest_Double
     private static IEnumerator<double> WaitUntilOtherCor2(CoroutineHandle coroutineHandle)
     {
         yield return 0;
-        yield return CoroutineDoubleManager.StartAfterCoroutine(coroutineHandle);
+        yield return CoroutineManager.StartAfterCoroutine<double>(coroutineHandle);
         yield return 1;
         yield break;
     }

@@ -7,8 +7,8 @@ internal class Program
     public static void Main(string[] _)
     {
 #if NET47
-        CoroutineWorkerCustom.UpdateRate = 1 / 144f;
         CoroutineFloatManager.Start();
+        CoroutineWorkerCustom.UpdateRate = 1 / 144f;
         CoroutineFloatManager.Stop();
         var handle = CoroutineFloatManager.StartCoroutine(CountingDown(), "Test");
         while (CoroutineFloatManager.IsCoroutineExists(handle))
@@ -16,11 +16,11 @@ internal class Program
             Thread.Sleep(10);
         }
 #else
-        CoroutineWorkerCustom<double>.UpdateRate = 1 / 144f;
-        CoroutineDoubleManager.Start();
-        CoroutineDoubleManager.Stop();
-        var handle = CoroutineDoubleManager.StartCoroutine(TestExport.CountingDown(), "Test");
-        while (CoroutineDoubleManager.IsCoroutineExists(handle))
+        CoroutineManager.Start<double>();
+        (CoroutineManager.GetWorker<double>() as CoroutineWorkerCustom<double>)?.UpdateRate = 1 / 144f;
+        CoroutineManager.Stop<double>();
+        var handle = CoroutineManager.StartCoroutine(TestExport.CountingDown(), "Test");
+        while (CoroutineManager.IsCoroutineExists<double>(handle))
         {
             Thread.Sleep(10);
         }
