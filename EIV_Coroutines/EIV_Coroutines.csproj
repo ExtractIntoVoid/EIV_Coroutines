@@ -1,37 +1,47 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- Main Properties -->
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net10.0;netstandard2.0</TargetFrameworks>
+		<TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<Title>Coroutines for EIV</Title>
-		<Authors>Extract Into Void</Authors>
-		<Company>Extract Into Void</Company>
-		<Description>Coroutines for EIV</Description>
-		<Copyright>Extract Into Void</Copyright>
-		<PackageProjectUrl>https://github.com/ExtractIntoVoid/EIV_Coroutines</PackageProjectUrl>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<Version>2.3</Version>
-		<FileVersion>2.3</FileVersion>
 		<LangVersion>latest</LangVersion>
 
+		<!-- Package related -->
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+		<!-- Analyzers -->
 		<EnableTrimAnalyzer>true</EnableTrimAnalyzer>
 		<EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
 		<EnableAotAnalyzer>true</EnableAotAnalyzer>
 		<IsAotCompatible>true</IsAotCompatible>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+
+		<!-- Configurations -->
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<AnalysisLevel>latest-all</AnalysisLevel>
 		<AnalysisMode>Recommended</AnalysisMode>
-		<EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
 		<WarningLevel>4</WarningLevel>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
 
+	<!-- Editable properties -->
+	<PropertyGroup>
+		<Title>Coroutines for EIV</Title>
+		<Authors>ExtractIntoVoid</Authors>
+		<Company>ExtractIntoVoid</Company>
+		<Description>Coroutines for EIV</Description>
+		<Copyright>(c) 2025-2026 ExtractIntoVoid</Copyright>
+		<PackageProjectUrl>https://github.com/ExtractIntoVoid/EIV_Coroutines</PackageProjectUrl>
+		<Version>2.3</Version>
+		<FileVersion>2.3</FileVersion>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<None Include="..\LICENSE" Pack="true" PackagePath="\" />
+		<None Include="..\LICENSE.txt" Pack="true" PackagePath="\" />
 		<None Include="..\README.md" Pack="true" PackagePath="\" />
 	</ItemGroup>
 

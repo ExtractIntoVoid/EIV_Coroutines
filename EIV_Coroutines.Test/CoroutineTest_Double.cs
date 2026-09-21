@@ -49,17 +49,15 @@ public class CoroutineTest_Double
         Assert.NotNull(cor);
         Assert.AreEqual(coroutine, cor);
 
+        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineExistsInstance(CountingDownHash));
+        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineRunningInstance(CountingDownHash));
+        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineSuccessInstance(CountingDownHash));
+
         CoroutineManager.GetWorker<double>()!.UpdateDT(0);
 
         Assert.True(CoroutineManager.GetWorker<double>()!.HasAnyCoroutinesInstance());
 
         cor = CoroutineManager.GetWorker<double>()!.GetCoroutine(CountingDownHash);
-
-        Console.WriteLine(cor);
-
-        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineExistsInstance(CountingDownHash));
-        Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutineRunningInstance(CountingDownHash));
-        Assert.False(CoroutineManager.GetWorker<double>()!.IsCoroutineSuccessInstance(CountingDownHash));
 
         CoroutineManager.GetWorker<double>()!.PauseCoroutineInstance(CountingDownHash);
         Assert.True(CoroutineManager.GetWorker<double>()!.IsCoroutinePausedInstance(CountingDownHash));

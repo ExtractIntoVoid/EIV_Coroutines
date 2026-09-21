@@ -51,13 +51,13 @@ public class CoroutineTest_Float
         Assert.NotNull(cor);
         Assert.AreEqual(coroutine, cor);
 
-        CoroutineManager.GetWorker<float>()!.UpdateDT(1);
-
-        Assert.True(CoroutineManager.GetWorker<float>()!.HasAnyCoroutinesInstance());
-
         Assert.True(CoroutineManager.GetWorker<float>()!.IsCoroutineExistsInstance(CountingDownHash));
         Assert.True(CoroutineManager.GetWorker<float>()!.IsCoroutineRunningInstance(CountingDownHash));
         Assert.False(CoroutineManager.GetWorker<float>()!.IsCoroutineSuccessInstance(CountingDownHash));
+
+        CoroutineManager.GetWorker<float>()!.UpdateDT(1);
+
+        Assert.True(CoroutineManager.GetWorker<float>()!.HasAnyCoroutinesInstance());
 
         CoroutineManager.GetWorker<float>()!.PauseCoroutineInstance(CountingDownHash);
         Assert.True(CoroutineManager.GetWorker<float>()!.IsCoroutinePausedInstance(CountingDownHash));

@@ -1,34 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0;net47</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <Title>Coroutines for EIV</Title>
-    <Authors>Extract Into Void</Authors>
-    <Company>Extract Into Void</Company>
-    <Description>Coroutines for EIV</Description>
-    <Copyright>Extract Into Void</Copyright>
-    <PackageProjectUrl>https://github.com/ExtractIntoVoid/EIV_Coroutines</PackageProjectUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>2.0</Version>
-    <FileVersion>2.0</FileVersion>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net10.0;net47</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<OutputType>Exe</OutputType>
+		<LangVersion>latest</LangVersion>
 
-    <IsAotCompatible Condition="'$(TargetFramework)' != 'net47'">True</IsAotCompatible>
-    <PublishAot  Condition="'$(TargetFramework)' != 'net47'">true</PublishAot>
+		<IsAotCompatible Condition="'$(TargetFramework)' != 'net47'">True</IsAotCompatible>
+		<PublishAot  Condition="'$(TargetFramework)' != 'net47'">true</PublishAot>
 
-    <OutputType>Exe</OutputType>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="..\LICENSE" Pack="true" PackagePath="\" />
-    <Content Include="..\README.md" Pack="true" PackagePath="\" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EIV_Coroutines\EIV_Coroutines.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\EIV_Coroutines\EIV_Coroutines.csproj" />
+	</ItemGroup>
 
 </Project>
