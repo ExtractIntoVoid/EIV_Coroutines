@@ -12,10 +12,10 @@ namespace EIV_Coroutines.CoroutineWorkers;
 public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
     where T : IFloatingPoint<T>, IFloatingPointIeee754<T>
 {
+    private static readonly T OneMillisecond = T.CreateChecked(1000);
+    private volatile bool isRunning;
     private Thread? updateThread;
     private readonly Stopwatch watch = new();
-    private T prevTime = T.Zero;
-    private T accumulator = T.Zero;
     private SynchronizationContext? mainContext;
     private readonly ConcurrentDictionary<CoroutineHandle, Coroutine<T>> safeCoroutines = [];
 
@@ -53,11 +53,11 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
     {
         safeCoroutines.Clear();
         watch.Start();
-        prevTime = T.CreateChecked(watch.ElapsedMilliseconds / 1000);
         updateThread = new(ThreadUpdate)
         {
             IsBackground = true,
         };
+        isRunning = true;
         updateThread.Start();
         mainContext = SynchronizationContext.Current;
     }
@@ -66,6 +66,7 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
     public void Quit()
     {
         safeCoroutines.Clear();
+        isRunning = false;
         updateThread?.Interrupt();
         updateThread = null;
         watch.Stop();
@@ -282,25 +283,20 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
 
     private void ThreadUpdate()
     {
-        if (updateThread == null)
+        try
         {
-            return;
-        }
-
-        while (updateThread != null && updateThread.ThreadState == System.Threading.ThreadState.Background)
-        {
-            if (PauseUpdate)
+            while (isRunning)
             {
-                continue;
-            }
+                if (PauseUpdate)
+                {
+                    continue;
+                }
 
-            T currTime = T.CreateChecked(watch.ElapsedMilliseconds / 1000d);
-            accumulator += currTime - prevTime;
-            prevTime = currTime;
+                T updateTime = T.CreateChecked(UpdateRate * OneMillisecond);
+                int updateInt = int.CreateChecked(updateTime);
 
-            if (accumulator > UpdateRate)
-            {
-                accumulator -= UpdateRate;
+                Thread.Sleep(updateInt);
+
                 if (mainContext != null)
                 {
                     mainContext.Send(UpdateObj, UpdateRate);
@@ -310,6 +306,9 @@ public class CoroutineWorkerCustom<T> : ICoroutineWorker<T>
                     UpdateDT(UpdateRate);
                 }
             }
+        }
+        catch (ThreadInterruptedException)
+        {
         }
     }
 }

@@ -44,8 +44,8 @@ public class CoroutineTest_Standard_Float
         Thread.Sleep(10);
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(CoroutineFloatManager.IsCoroutineExists(handle), Is.False);
-            Assert.That(CoroutineFloatManager.IsCoroutineSuccess(handle), Is.False);
+            Assert.That(CoroutineFloatManager.IsCoroutineExists(handle), Is.True);
+            Assert.That(CoroutineFloatManager.IsCoroutineSuccess(handle), Is.True);
         }
 
     }

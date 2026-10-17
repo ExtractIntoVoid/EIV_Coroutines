@@ -12,12 +12,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     /// <summary>
     /// Gets or sets the current update rate.
     /// </summary>
-    public static float UpdateRate { get; set; } = 1 / 60;
+    public static float UpdateRate { get; set; } = 1f;
 
+    private volatile bool isRunning;
     private Thread? updateThread;
     private readonly Stopwatch watch = new();
-    private float prevTime;
-    private float accumulator;
     private SynchronizationContext? mainContext;
     private readonly ConcurrentDictionary<CoroutineHandle, Coroutine> safeCoroutines = [];
 
@@ -50,11 +49,11 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     {
         safeCoroutines.Clear();
         watch.Start();
-        prevTime = watch.ElapsedMilliseconds / 1000;
         updateThread = new(ThreadUpdate)
         {
             IsBackground = true,
         };
+        isRunning = true;
         updateThread.Start();
         mainContext = SynchronizationContext.Current;
     }
@@ -63,6 +62,7 @@ public class CoroutineWorkerCustom : ICoroutineWorker
     public void Quit()
     {
         safeCoroutines.Clear();
+        isRunning = false;
         updateThread?.Interrupt();
         updateThread = null;
         watch.Stop();
@@ -282,25 +282,20 @@ public class CoroutineWorkerCustom : ICoroutineWorker
 
     private void ThreadUpdate()
     {
-        if (updateThread == null)
+        try
         {
-            return;
-        }
-
-        while (updateThread != null && updateThread.ThreadState == System.Threading.ThreadState.Background)
-        {
-            if (PauseUpdate)
+            while (isRunning)
             {
-                continue;
-            }
+                if (PauseUpdate)
+                {
+                    continue;
+                }
 
-            float currTime = (float)(watch.ElapsedMilliseconds / 1000d);
-            accumulator += currTime - prevTime;
-            prevTime = currTime;
+                float updateTime = (float)(UpdateRate * 1000f);
+                int updateInt = (int)updateTime;
 
-            if (accumulator > UpdateRate)
-            {
-                accumulator -= UpdateRate;
+                Thread.Sleep(updateInt);
+
                 if (mainContext != null)
                 {
                     mainContext.Send(UpdateObj, UpdateRate);
@@ -310,6 +305,9 @@ public class CoroutineWorkerCustom : ICoroutineWorker
                     UpdateDT(UpdateRate);
                 }
             }
+        }
+        catch (ThreadInterruptedException)
+        {
         }
     }
 }
